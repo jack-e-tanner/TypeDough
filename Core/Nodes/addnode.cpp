@@ -1,4 +1,5 @@
 #include "addnode.h"
+#include <iostream>
 
 AddNode::AddNode() : Node(-1, "Add")
 {
@@ -22,6 +23,7 @@ void AddNode::evaluate(FlowContext& ctx) {
     }
 
     ctx.set_output(0, result);
+    std::cout << "AFTER SET OUTPUT\n";
 }
 
 std::string AddNode::type_id() const {

@@ -1,5 +1,5 @@
 #include "graphmanager.h"
 
-GraphManager::GraphManager() : {
+GraphManager::GraphManager() : a(0) {
 
 }

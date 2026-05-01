@@ -5,7 +5,7 @@
 #include <string>
 
 /**
- * @brief The context class that will be passed to Nodes during evaluation
+ * @brief The base context class that will be passed to Nodes during evaluation
  * The GraphManager will use this ctx and the ctx needs access to it's map of nodes
  */
 
@@ -23,8 +23,6 @@ public:
     // This function will be used by nodes to set the value of
     // their output ports during evaluation
     virtual void set_output(int port_index, const DoughValue& value) = 0;
-private:
-
 };
 
 #endif // FLOWCONTEXT_H

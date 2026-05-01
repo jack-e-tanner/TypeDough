@@ -2,7 +2,7 @@
 #define NODE_H
 
 #include <string>
-#include "../flowcontext.h"
+#include "../Context/flowcontext.h"
 
 /**
  * @brief The base node class that all nodes will inherit from;

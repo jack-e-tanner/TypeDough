@@ -1,6 +1,8 @@
 #include "Window/mainwindow.h"
 
 #include <QApplication>
+#include "Core/Nodes/addnode.h"
+#include "Core/Context/noderuntime.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,5 +10,9 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.show();
+
+    AddNode addNode;
+    NodeRuntime runtime;
+
     return QCoreApplication::exec();
 }
