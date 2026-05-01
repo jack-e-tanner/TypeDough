@@ -6,7 +6,7 @@
 class AddNode : public Node
 {
 public:
-    AddNode();
+    AddNode(int id, const std::string& name);
 
     void evaluate(FlowContext& ctx) override;
 
