@@ -1,0 +1,19 @@
+The architecture of this so far
+
+The Graph manager
+        |
+        |
+        ⌄
+    Flow context
+        |
+        |
+        ⌄
+    Node class
+
+So the graph manager handles all the connections and ports
+
+The flow context just sets and gets the data from the map of all the nodes and does
+whatever the graph manager tells it to do so
+
+The node class of course stores the actual data in that node and has functions that use
+the context to get the data from other nodes and do whatever it needs to do with it.

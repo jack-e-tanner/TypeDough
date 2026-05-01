@@ -1,0 +1,6 @@
+# Qt Creator generated files
+.qtcreator
+
+# Build directories (adjust if your build folder has a different name)
+build/
+CMakeLists.txt
