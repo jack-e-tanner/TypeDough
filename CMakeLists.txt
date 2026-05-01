@@ -16,6 +16,7 @@ qt_add_executable(TypeDough
     Core/Context/flowcontext.h Core/Context/flowcontext.cpp
     Core/graphmanager.h Core/graphmanager.cpp
     Core/Context/noderuntime.h Core/Context/noderuntime.cpp
+    Core/Core.h
 )
 
 target_link_libraries(TypeDough

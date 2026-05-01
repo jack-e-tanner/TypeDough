@@ -6,7 +6,7 @@
 
 /**
  * @brief The base context class that will be passed to Nodes during evaluation
- * The GraphManager will use this ctx and the ctx needs access to it's map of nodes
+ *
  */
 
 using DoughValue = std::variant<int, float, std::string, bool>;

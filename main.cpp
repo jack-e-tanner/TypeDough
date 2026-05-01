@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include "Core/Nodes/addnode.h"
-#include "Core/Context/noderuntime.h"
 #include "Core/graphmanager.h"
 
 int main(int argc, char *argv[])
