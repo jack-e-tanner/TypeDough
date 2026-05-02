@@ -1,6 +1,21 @@
 #include "graphmanager.h"
 #include "Core.h"
 
+bool GraphManager::delete_node(int id) {
+    if (!m_nodes.contains(id))
+        return false;
+
+    // Remove the node
+    m_nodes.erase(id);
+
+    // Remove all connections to this node
+    for (auto& [node_id, node_entry] : m_nodes) {
+        remove_helper(id, node_entry.incoming_connections, &Connection::source_id);
+    }
+
+    return true;
+}
+
 DoughValue GraphManager::get_node_output(int id, int port) {
     auto it = m_nodes.find(id);
 
@@ -29,12 +44,18 @@ void GraphManager::set_node_output(int id, int port, DoughValue value) {
     outputs[port] = std::move(value);
 }
 
+void GraphManager::remove_helper(int this_port, std::vector<Connection>& connections, int Connection::*field) {
+    std::erase_if(connections, [this_port, field](const Connection& conn) {
+        return conn.*field == this_port;
+    });
+}
+
 void GraphManager::add_connection(int source_id, int source_port, int this_id, int this_port) {
     auto source_it = m_nodes.find(source_id);
     DOUGH_ASSERT(source_it != m_nodes.end(), "Attempted to connect from non-existent source node");
 
-    auto target_it = m_nodes.find(this_id);
-    DOUGH_ASSERT(target_it != m_nodes.end(), "Attempted to connect to non-existent target node");
+    auto this_it = m_nodes.find(this_id);
+    DOUGH_ASSERT(this_it != m_nodes.end(), "Attempted to connect to non-existent target node");
 
     Connection conn {
         .source_id = source_id,
@@ -43,19 +64,31 @@ void GraphManager::add_connection(int source_id, int source_port, int this_id, i
     };
 
     // remove any existing connections to the same target port
-    auto& connections = target_it->second.incoming_connections;
+    auto& connections = this_it->second.incoming_connections;
 
-    std::erase_if(connections, [&](const Connection& conn) {
-        return conn.this_port == this_port;
-    })
+    remove_helper(this_port, connections, &Connection::this_port);
 
     connections.push_back(std::move(conn));
 }
 
+void GraphManager::remove_connection(int this_node, int this_port) {
+    auto this_it = m_nodes.find(this_node);
+    DOUGH_ASSERT(this_it != m_nodes.end(), "Attempted to remove connection from non-existent target node");
+
+    auto& connections = this_it->second.incoming_connections;
+
+    remove_helper(this_port, connections, &Connection::this_port);
+}
 
 void GraphManager::print_nodes() {
     for (const auto& node : m_nodes) {
         std::cout << "Node ID: " << node.first << ", Name: " << node.second.node->get_name() << std::endl;
     }
+}
+
+std::string GraphManager::get_node_name(int id) {
+    if (m_nodes.contains(id))
+        return m_nodes[id].node->get_name();
+    return "No Node exists with id " + std::to_string(id);
 }
 

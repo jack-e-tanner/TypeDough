@@ -3,6 +3,8 @@ project(TypeDough LANGUAGES CXX)
 
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
 
+set(CMAKE_CXX_STANDARD 20)
+
 qt_standard_project_setup()
 
 qt_add_executable(TypeDough

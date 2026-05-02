@@ -14,28 +14,33 @@ public:
 
     // Create a node
     template<typename T>
-    T* create_node(const std::string& name) {
+    int create_node(const std::string& name) {
         int id = m_next_id++;
 
         auto node = std::make_unique<T>(id, name);
         T* ptr = node.get();
 
-        NodeEntry entry {
+        m_nodes.emplace(id, NodeEntry {
             .node = std::move(node),
             .incoming_connections = {},
+            .outgoing_connections = {},
             .output = {}
-        };
+        });
 
-        m_nodes[id] = std::move(entry);
-
-        return ptr;
+        return id; // UI can use this id to reference the node
     }
+
+    bool delete_node(int id);
+
+    std::string get_node_name(int id);
 
     DoughValue get_node_output(int id, int port);
 
     void set_node_output(int id, int port, DoughValue value);
 
     void add_connection(int source_node, int source_port, int this_node, int this_port);
+
+    void remove_connection(int this_node, int this_port);
 
     void print_nodes();
 
@@ -47,14 +52,17 @@ private:
     };
 
     struct NodeEntry {
-        std::unique_ptr<Node> node;
-        std::vector<Connection> incoming_connections;
-        std::vector<DoughValue> output;
+        std::unique_ptr<Node> node; // instance of the node
+        std::vector<Connection> incoming_connections; // connections feeding into this node
+        std::vector<Connection> outgoing_connections; // connections feeding out of this node
+        std::vector<DoughValue> output; // cached output values for this node, indexed by output port
     };
 
     std::unordered_map<int, NodeEntry> m_nodes;
 
     int m_next_id = 0; // for auto-incrementing node IDs
+
+    void remove_helper(int this_port, std::vector<Connection>& connections, int Connection::*field);
 };
 
 #endif // GRAPHMANAGER_H
