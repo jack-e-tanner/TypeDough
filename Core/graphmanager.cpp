@@ -52,24 +52,35 @@ void GraphManager::remove_helper(int this_port, std::vector<Connection>& connect
 }
 
 void GraphManager::add_connection(Port from, Port to) {
-    auto source_it = m_nodes.find(from.node);
-    DOUGH_ASSERT(source_it != m_nodes.end(), "Attempted to connect from non-existent source node");
-
-    auto this_it = m_nodes.find(to.node);
-    DOUGH_ASSERT(this_it != m_nodes.end(), "Attempted to connect to non-existent target node");
+    DOUGH_ASSERT(can_connect(from, to), "Can't connect to this port");
 
     Connection conn {
-        .source_id = from.node,
-        .source_port = from.port,
-        .this_port = to.port
+        .source_id = from.node_id,
+        .source_port = from.port_id,
+        .this_port = to.port_id
     };
 
     // remove any existing connections to the same target port
-    auto& connections = this_it->second.incoming_connections;
+    auto& connections = m_nodes.at(to.node_id).incoming_connections;
 
-    remove_helper(to.port, connections, &Connection::this_port);
+    remove_helper(to.port_id, connections, &Connection::this_port);
 
     connections.push_back(std::move(conn));
+}
+
+bool GraphManager::can_connect(Port from, Port to) const {
+    auto source_it = m_nodes.find(from.node_id);
+    if (source_it == m_nodes.end()) return false;
+
+    auto this_it = m_nodes.find(to.node_id);
+    if (this_it == m_nodes.end()) return false;
+
+    if (!(source_it->second.node->output_ports().accepts(from.port_id))) return false;
+    if (!(this_it->second.node->input_ports().accepts(to.port_id))) return false;
+
+    if (from.node_id == to.node_id) return false;
+
+    return true;
 }
 
 void GraphManager::remove_connection(int this_node, int this_port) {
@@ -84,6 +95,11 @@ void GraphManager::remove_connection(int this_node, int this_port) {
 void GraphManager::print_nodes() {
     for (const auto& node : m_nodes) {
         std::cout << "Node ID: " << node.first << ", Name: " << node.second.node->get_name() << std::endl;
+
+        std::cout << "Connections:\n";
+        for (const auto& conns : node.second.incoming_connections) {
+            std::cout << "\tFrom node: " << conns.source_id << " , port: " << conns.source_port << std::endl;
+        }
     }
 }
 

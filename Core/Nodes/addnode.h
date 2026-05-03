@@ -10,10 +10,10 @@ public:
 
     void evaluate(NodeRuntime& runtime) override;
 
-    PortCount set_num_inputs() const override;
-    PortCount set_num_outputs() const override;
+    PortCount input_ports() const override;
+    PortCount output_ports() const override;
 
-    const std::string& type_id() const override;
+    std::string_view type_id() const override;
 };
 
 #endif // ADDNODE_H

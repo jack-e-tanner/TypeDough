@@ -8,10 +8,14 @@ void AddNode::evaluate(NodeRuntime& runtime) {
 
 }
 
-AddNode::PortCount AddNode::set_num_inputs() const {
+std::string_view AddNode::type_id() const {
+    return "add.node";
+}
+
+AddNode::PortCount AddNode::input_ports() const {
     return AddNode::PortCount::dynamic();
 }
 
-AddNode::PortCount AddNode::set_num_outputs() const {
+AddNode::PortCount AddNode::output_ports() const {
     return AddNode::PortCount::fixed(1);
 }

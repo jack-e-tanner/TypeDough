@@ -37,9 +37,15 @@ public:
 
     void set_node_output(int id, int port, DoughValue value);
 
-    struct Port { int node; int port; };
+    struct Port {
+        int node_id;
+        int port_id;
+    };
 
     void add_connection(Port from, Port to);
+
+    // Used for ui to check if you can connect; change wire colors
+    bool can_connect(Port from, Port to) const;
 
     void remove_connection(int this_node, int this_port);
 

@@ -43,12 +43,12 @@ public:
         }
     };
 
-    virtual PortCount set_num_inputs() const = 0;
-    virtual PortCount set_num_outputs() const = 0;
+    virtual PortCount input_ports() const = 0;
+    virtual PortCount output_ports() const = 0;
 
     // Return a unique string identifier for the node type;
     // used for serialization and deserialization
-    virtual const std::string& type_id() const = 0;
+    virtual std::string_view type_id() const = 0;
 
     inline int get_id() const { return m_id; }
     inline const std::string& get_name() const { return m_name; }
