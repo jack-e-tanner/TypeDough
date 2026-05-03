@@ -13,4 +13,6 @@
     std::abort(); \
 } }
 
+#define DOUGH_INFO(x) { std::cout << "[DOUGH INFO] " << x << std::endl; }
+
 #endif // CORE_H

@@ -11,6 +11,7 @@ bool GraphManager::delete_node(int id) {
     // Remove all connections to this node
     for (auto& [node_id, node_entry] : m_nodes) {
         remove_helper(id, node_entry.incoming_connections, &Connection::source_id);
+        remove_helper(id, node_entry.outgoing_connections, &Connection::source_id);
     }
 
     return true;
@@ -50,23 +51,23 @@ void GraphManager::remove_helper(int this_port, std::vector<Connection>& connect
     });
 }
 
-void GraphManager::add_connection(int source_id, int source_port, int this_id, int this_port) {
-    auto source_it = m_nodes.find(source_id);
+void GraphManager::add_connection(Port from, Port to) {
+    auto source_it = m_nodes.find(from.node);
     DOUGH_ASSERT(source_it != m_nodes.end(), "Attempted to connect from non-existent source node");
 
-    auto this_it = m_nodes.find(this_id);
+    auto this_it = m_nodes.find(to.node);
     DOUGH_ASSERT(this_it != m_nodes.end(), "Attempted to connect to non-existent target node");
 
     Connection conn {
-        .source_id = source_id,
-        .source_port = source_port,
-        .this_port = this_port
+        .source_id = from.node,
+        .source_port = from.port,
+        .this_port = to.port
     };
 
     // remove any existing connections to the same target port
     auto& connections = this_it->second.incoming_connections;
 
-    remove_helper(this_port, connections, &Connection::this_port);
+    remove_helper(to.port, connections, &Connection::this_port);
 
     connections.push_back(std::move(conn));
 }
@@ -86,9 +87,9 @@ void GraphManager::print_nodes() {
     }
 }
 
-std::string GraphManager::get_node_name(int id) {
-    if (m_nodes.contains(id))
-        return m_nodes[id].node->get_name();
-    return "No Node exists with id " + std::to_string(id);
-}
+const std::string& GraphManager::get_node_name(int id) const {
+    auto it = m_nodes.find(id);
+    DOUGH_ASSERT(it != m_nodes.end(), "Attempted to get name of non-existent node");
 
+    return it->second.node->get_name();
+}

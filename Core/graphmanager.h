@@ -18,12 +18,11 @@ public:
         int id = m_next_id++;
 
         auto node = std::make_unique<T>(id, name);
-        T* ptr = node.get();
 
         m_nodes.emplace(id, NodeEntry {
             .node = std::move(node),
             .incoming_connections = {},
-            .outgoing_connections = {},
+            .outgoing_connections = {} ,
             .output = {}
         });
 
@@ -32,13 +31,15 @@ public:
 
     bool delete_node(int id);
 
-    std::string get_node_name(int id);
+    const std::string& get_node_name(int id) const;
 
     DoughValue get_node_output(int id, int port);
 
     void set_node_output(int id, int port, DoughValue value);
 
-    void add_connection(int source_node, int source_port, int this_node, int this_port);
+    struct Port { int node; int port; };
+
+    void add_connection(Port from, Port to);
 
     void remove_connection(int this_node, int this_port);
 

@@ -8,9 +8,12 @@ class AddNode : public Node
 public:
     AddNode(int id, const std::string& name);
 
-    void evaluate(FlowContext& ctx) override;
+    void evaluate(NodeRuntime& runtime) override;
 
-    std::string type_id() const override;
+    PortCount set_num_inputs() const override;
+    PortCount set_num_outputs() const override;
+
+    const std::string& type_id() const override;
 };
 
 #endif // ADDNODE_H

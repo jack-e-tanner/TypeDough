@@ -1,0 +1,25 @@
+The Graph manager
+        ^
+        |
+        |
+        ⌄
+    Runtime
+        |
+        |
+        ⌄
+    Node class
+
+Pull based design:
+    1. Do a topological sort first to determine the order of evaluation of the nodes
+    2. Each node pulls its inputs from cached outputs of upstream nodes
+    3. Node writes it's own output
+
+So the graph manager handles all the connections and ports and has the map of
+node id's and the actual node itself
+
+The runtime is responsible for getting the nodes data from the graph manager which the
+node class uses. The runtime is only going to be used on the stack and then deleted,
+but each node will have an instance of a runtime only when evaluating needs to happen.
+
+The node class has it's own evaluate implementation and uses runtime to get all the necessary
+information of itself.

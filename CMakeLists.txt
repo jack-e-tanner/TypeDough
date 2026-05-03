@@ -15,7 +15,7 @@ qt_add_executable(TypeDough
     Window/mainwindow.ui
     Core/Nodes/node.h Core/Nodes/node.cpp
     Core/Nodes/addnode.h Core/Nodes/addnode.cpp
-    Core/Context/flowcontext.h Core/Context/flowcontext.cpp
+
     Core/graphmanager.h Core/graphmanager.cpp
     Core/Context/noderuntime.h Core/Context/noderuntime.cpp
     Core/Core.h

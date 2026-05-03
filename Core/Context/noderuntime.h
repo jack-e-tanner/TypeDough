@@ -1,16 +1,30 @@
 #ifndef NODERUNTIME_H
 #define NODERUNTIME_H
 
-#include "flowcontext.h"
+#include <variant>
+#include <string>
 
-class NodeRuntime : public FlowContext
+/**
+ * Plan is in graphmanager function create an instane of NodeRuntime on stack
+ * when evaluating a node, then just delete the noderuntime, so zero storage,
+ * however it could be constructed lots of times
+ */
+
+using DoughValue = std::variant<int, float, std::string, bool>;
+
+class GraphManager;
+
+class NodeRuntime
 {
 public:
-    NodeRuntime();
+    NodeRuntime(GraphManager& manager, int id) : m_manager(manager), m_self(id) {}
 
-    DoughValue get_input(int port_index) override;
+    DoughValue get_input_from_port(int port) const;
+    void set_output_from_port(int port, const DoughValue& value);
 
-    void set_output(int port_index, const DoughValue& value) override;
+private:
+    GraphManager& m_manager;
+    int m_self; // id of the node this runtime is associated with
 };
 
 #endif // NODERUNTIME_H
