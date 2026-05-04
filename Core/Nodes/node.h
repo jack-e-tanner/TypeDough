@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "../Context/noderuntime.h"
+#include "../noderuntime.h"
 #include "../Core.h"
 
 

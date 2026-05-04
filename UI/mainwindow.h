@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -18,6 +20,8 @@ public:
     ~MainWindow() override;
 
 private:
-    Ui::MainWindow *ui;
+    Ui::MainWindow* m_ui;
+    QGraphicsScene* m_scene;
+    QGraphicsView* m_view;
 };
 #endif // MAINWINDOW_H

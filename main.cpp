@@ -1,6 +1,10 @@
-#include "Window/mainwindow.h"
+#include "UI/mainwindow.h"
 
 #include <QApplication>
+#include <QPushButton>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QString>
 #include "Core/Nodes/addnode.h"
 #include "Core/graphmanager.h"
 
@@ -8,8 +12,28 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
+    w.setWindowTitle("TypeDough");
+    w.resize(600, 600);
 
-    w.show();
+    QWidget* central_widget = new QWidget(&w);
+
+    QVBoxLayout* layout = new QVBoxLayout(central_widget);
+
+    QLabel* label = new QLabel("Node Count: 0");
+    QPushButton* btn = new QPushButton("Add Node");
+
+    layout->addWidget(label);
+    layout->addWidget(btn);
+
+    w.setCentralWidget(central_widget);
+
+    int node_count = 0;
+
+    QObject::connect(btn, &QPushButton::clicked, [&]() {
+        node_count++;
+
+        label->setText("Node Count: " + QString::number(node_count));
+    });
 
     GraphManager manager;
 
@@ -32,5 +56,6 @@ int main(int argc, char *argv[])
 
     manager.print_nodes();
 
-    return QCoreApplication::exec();
+    w.show();
+    return a.exec();
 }

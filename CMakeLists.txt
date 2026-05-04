@@ -10,15 +10,16 @@ qt_standard_project_setup()
 qt_add_executable(TypeDough
     WIN32 MACOSX_BUNDLE
     main.cpp
-    Window/mainwindow.cpp
-    Window/mainwindow.h
-    Window/mainwindow.ui
+    UI/mainwindow.cpp
+    UI/mainwindow.h
+    UI/mainwindow.ui
     Core/Nodes/node.h Core/Nodes/node.cpp
     Core/Nodes/addnode.h Core/Nodes/addnode.cpp
 
     Core/graphmanager.h Core/graphmanager.cpp
-    Core/Context/noderuntime.h Core/Context/noderuntime.cpp
+    Core/noderuntime.h Core/noderuntime.cpp
     Core/Core.h
+    UI/nodeitem.h UI/nodeitem.cpp
 )
 
 target_link_libraries(TypeDough
