@@ -15,6 +15,15 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setDragMode(QGraphicsView::ScrollHandDrag);
 
     setCentralWidget(m_view);
+
+    spawn_node(NodeType::Add, QPointF(-100, 0));
+
+    spawn_node(NodeType::Add, QPointF(150, 50));
+
+    GraphManager::Port out_port = {0, 0};
+    GraphManager::Port in_port = {1, 0};
+
+    spawn_wire(out_port, in_port);
 }
 
 MainWindow::~MainWindow() {
