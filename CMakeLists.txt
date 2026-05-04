@@ -20,6 +20,7 @@ qt_add_executable(TypeDough
     Core/noderuntime.h Core/noderuntime.cpp
     Core/Core.h
     UI/nodeitem.h UI/nodeitem.cpp
+    UI/wireitem.h UI/wireitem.cpp
 )
 
 target_link_libraries(TypeDough

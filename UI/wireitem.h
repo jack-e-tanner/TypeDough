@@ -1,21 +1,20 @@
-#ifndef NODEITEM_H
-#define NODEITEM_H
+#ifndef WIREITEM_H
+#define WIREITEM_H
 
 #include <QGraphicsItem>
 #include <QPainter>
 
-class NodeItem : public QGraphicsItem
+class WireItem : QGraphicsItem
 {
 public:
-    NodeItem(int id, QString name);
+    WireItem(QGraphicsItem* startItem, QGraphicsItem* endItem);
 
     QRectF boundingRect() const override;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
 private:
-    int m_id;
-    QString m_name;
+    QGraphicsItem *m_startItem, *m_endItem;
 };
 
-#endif // NODEITEM_H
+#endif // WIREITEM_H
