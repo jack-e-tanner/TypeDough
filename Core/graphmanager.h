@@ -42,7 +42,7 @@ public:
         int port_id;
     };
 
-    void add_connection(Port from, Port to);
+    bool add_connection(Port from, Port to);
 
     // Used for ui to check if you can connect; change wire colors
     bool can_connect(Port from, Port to) const;

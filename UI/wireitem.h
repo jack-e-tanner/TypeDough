@@ -3,18 +3,19 @@
 
 #include <QGraphicsItem>
 #include <QPainter>
+#include "nodeitem.h"
 
-class WireItem : QGraphicsItem
+class WireItem : public QGraphicsItem
 {
 public:
-    WireItem(QGraphicsItem* startItem, QGraphicsItem* endItem);
+    WireItem(NodeItem* startNode, int startPort, NodeItem* endNode, int endPort);
 
     QRectF boundingRect() const override;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-
 private:
-    QGraphicsItem *m_startItem, *m_endItem;
+    NodeItem *m_startNode, *m_endNode;
+    int m_startPort, m_endPort;
 };
 
 #endif // WIREITEM_H

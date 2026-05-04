@@ -1,5 +1,5 @@
 #include "graphmanager.h"
-#include "Core.h"
+#include "core.h"
 
 bool GraphManager::delete_node(int id) {
     if (!m_nodes.contains(id))
@@ -51,8 +51,8 @@ void GraphManager::remove_helper(int this_port, std::vector<Connection>& connect
     });
 }
 
-void GraphManager::add_connection(Port from, Port to) {
-    DOUGH_ASSERT(can_connect(from, to), "Can't connect to this port");
+bool GraphManager::add_connection(Port from, Port to) {
+    if (!can_connect(from, to)) return false;
 
     Connection conn {
         .source_id = from.node_id,
@@ -66,6 +66,8 @@ void GraphManager::add_connection(Port from, Port to) {
     remove_helper(to.port_id, connections, &Connection::this_port);
 
     connections.push_back(std::move(conn));
+
+    return true;
 }
 
 bool GraphManager::can_connect(Port from, Port to) const {

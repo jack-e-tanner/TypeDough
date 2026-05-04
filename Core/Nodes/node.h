@@ -1,8 +1,8 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "../noderuntime.h"
-#include "../Core.h"
+#include "Core/noderuntime.h"
+#include "Core/core.h"
 
 
 /** Here at Jack Technologies Inc, we like to have fun ;)

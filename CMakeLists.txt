@@ -18,15 +18,22 @@ qt_add_executable(TypeDough
 
     Core/graphmanager.h Core/graphmanager.cpp
     Core/noderuntime.h Core/noderuntime.cpp
-    Core/Core.h
+    Core/core.h
     UI/nodeitem.h UI/nodeitem.cpp
     UI/wireitem.h UI/wireitem.cpp
+    Core/Nodes/NodeTypes.h
+    Core/Nodes/AllNodes.h
 )
 
 target_link_libraries(TypeDough
     PRIVATE
         Qt::Core
         Qt::Widgets
+)
+
+target_include_directories(TypeDough
+    PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 install(TARGETS TypeDough

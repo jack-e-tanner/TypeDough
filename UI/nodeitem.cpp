@@ -21,3 +21,10 @@ void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawEllipse(-5, 40, 10, 10);
     painter->drawEllipse(115, 40, 10, 10);
 }
+
+QPointF NodeItem::get_port_scene_pos(int port_id, bool is_input) const {
+    qreal x = is_input ? 0 : 120;
+    qreal y = 40 + (port_id * 20);
+
+    return mapToScene(QPointF(x, y));
+}

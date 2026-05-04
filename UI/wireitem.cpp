@@ -1,22 +1,30 @@
 #include "wireitem.h"
 #include <QPointF>
 
-WireItem::WireItem(QGraphicsItem* startItem, QGraphicsItem* endItem)
-    : m_startItem(startItem), m_endItem(endItem) {
+WireItem::WireItem(NodeItem* startNode, int startPort, NodeItem* endNode, int endPort)
+    : QGraphicsItem(nullptr),
+      m_startNode(startNode), m_endNode(endNode),
+      m_startPort(startPort), m_endPort(endPort)
+{
     setZValue(-1);
 }
 
 QRectF WireItem::boundingRect() const {
-    return m_startItem->sceneBoundingRect().united(m_endItem->sceneBoundingRect());
+    return m_startNode->sceneBoundingRect().united(m_endNode->sceneBoundingRect());
 }
 
-void WireItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    QPointF p1 = m_startItem->scenePos() + QPointF(120, 45);
-    QPointF p2 = m_endItem->scenePos() + QPointF(0, 45);
+void WireItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {
+    QPointF p1 = m_startNode->get_port_scene_pos(m_startPort, false);
+    QPointF p2 = m_endNode->get_port_scene_pos(m_endPort, true);
 
-    QPainterPath path(p1);
-    qreal ctrlX = (p1.x() + p2.x()) / 2;
-    path.cubicTo(ctrlX, p1.y(), ctrlX, p2.y(), p2.x(), p2.y());
+    QPointF local_p1 = mapFromScene(p1);
+    QPointF local_p2 = mapFromScene(p2);
+
+    QPainterPath path(local_p1);
+    qreal dx = local_p2.x() - local_p1.x();
+    qreal ctrlX = local_p1.x() + dx * 0.5;
+
+    path.cubicTo(ctrlX, local_p1.y(), ctrlX, local_p2.y(), local_p2.x(), local_p2.y());
 
     painter->setPen(QPen(Qt::yellow, 2));
     painter->drawPath(path);
