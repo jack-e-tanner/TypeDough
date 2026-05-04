@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include <iostream>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , m_ui(new Ui::MainWindow())
@@ -16,29 +18,35 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(m_view);
 
-    spawn_node(NodeType::Add, QPointF(-100, 0));
+    if(!spawn_node(NodeType::Subtract, QPointF(-100, 0))) std::cout << "WRONG";
 
-    spawn_node(NodeType::Add, QPointF(150, 50));
+    if(!spawn_node(NodeType::Add, QPointF(150, 50))) std::cout << "wrong";
+
+    if(!spawn_node(NodeType::Add, QPointF(0, 1))) std::cout << "wrong";
 
     GraphManager::Port out_port = {0, 0};
     GraphManager::Port in_port = {1, 0};
+    GraphManager::Port id = {2, 1};
 
-    spawn_wire(out_port, in_port);
+    if (!spawn_wire(out_port, in_port)) std::cout << "NO";
+    if (!spawn_wire(id, in_port)) std::cout << "NAH";
 }
 
 MainWindow::~MainWindow() {
     delete m_ui;
 }
 
-void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
+bool MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
     auto [id, label] = creation_helper(type);
 
-    if (id == -1) return;
+    if (id == -1) return false;;
     NodeItem* visual_node = new NodeItem(id, label);
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
 
     m_visual_nodes[id] = visual_node;
+
+    return true;
 }
 
 std::pair<int, QString> MainWindow::creation_helper(NodeType type) {
@@ -53,19 +61,22 @@ std::pair<int, QString> MainWindow::creation_helper(NodeType type) {
     }
 }
 
-void MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
+bool MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
     auto from_it = m_visual_nodes.find(from.node_id);
     auto to_it = m_visual_nodes.find(to.node_id);
 
-    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end()) return;
+    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end()) return false;
 
-    if (!m_manager.add_connection(from, to)) return;
+    if (!m_manager.add_connection(from, to)) return false;
 
     WireItem* visual_wire = new WireItem(
         from_it->second, from.port_id,
         to_it->second, to.port_id
-    );
+        );
 
     m_scene->addItem(visual_wire);
+
+    return true;
 }
+
 

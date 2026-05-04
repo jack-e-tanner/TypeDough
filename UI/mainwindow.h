@@ -24,8 +24,8 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    void spawn_node(NodeType type, QPointF scene_pos);
-    void spawn_wire(GraphManager::Port from, GraphManager::Port to);
+    bool spawn_node(NodeType type, QPointF scene_pos);
+    bool spawn_wire(GraphManager::Port from, GraphManager::Port to);
 
 private:
     std::pair<int, QString> creation_helper(NodeType type);

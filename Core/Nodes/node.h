@@ -6,7 +6,7 @@
 
 
 /** Here at Jack Technologies Inc, we like to have fun ;)
- *  (potential subsidiary of Purrquinox)
+ *
  */
 inline constexpr int UNLIMITED_DOUGH = -0xD0E;
 
@@ -34,7 +34,7 @@ public:
 
         bool accepts(int port) const {
             if (port < 0) return false;
-            return num_ports == UNLIMITED_DOUGH || port < num_ports;
+            return num_ports == UNLIMITED_DOUGH || port < (num_ports);
         }
 
         bool is_dynamic() const { return num_ports == UNLIMITED_DOUGH; }

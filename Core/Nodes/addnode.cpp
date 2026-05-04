@@ -9,7 +9,7 @@ void AddNode::evaluate(NodeRuntime& runtime) {
 }
 
 std::string_view AddNode::type_id() const {
-    return "add.node";
+    return "Add";
 }
 
 AddNode::PortCount AddNode::input_ports() const {
