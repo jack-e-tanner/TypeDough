@@ -9,6 +9,7 @@
 #include "Core/Nodes/AllNodes.h"
 #include "Core/Nodes/NodeTypes.h"
 #include "wireitem.h"
+#include "QKeyEvent"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -27,6 +28,12 @@ public:
     bool spawn_node(NodeType type, QPointF scene_pos);
     bool spawn_wire(GraphManager::Port from, GraphManager::Port to);
 
+    void show_context_menu(const QPoint& pos);
+
+    void keyPressEvent(QKeyEvent *event) override;
+    void keyReleaseEvent(QKeyEvent *event) override;
+    void show_node_options(int node_id, const QPoint& screen_pos);
+
 private:
     std::pair<int, QString> creation_helper(NodeType type);
 
@@ -36,6 +43,5 @@ private:
 
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;
-
 };
 #endif // MAINWINDOW_H

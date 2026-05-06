@@ -14,23 +14,70 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget"/>
-  <widget class="QMenuBar" name="menubar">
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>25</height>
+     <height>30</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menuPENIS">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>PENIS</string>
+     <string>File</string>
     </property>
+    <addaction name="actionSave"/>
+    <addaction name="actionEdit"/>
+    <addaction name="actionOpen"/>
    </widget>
-   <addaction name="menuPENIS"/>
+   <widget class="QMenu" name="menuNodes">
+    <property name="title">
+     <string>Nodes</string>
+    </property>
+    <addaction name="actionAdd"/>
+    <addaction name="actionSub"/>
+    <addaction name="actionMult"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuNodes"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="text">
+    <string>SaveAs</string>
+   </property>
+  </action>
+  <action name="actionEdit">
+   <property name="text">
+    <string>Edit</string>
+   </property>
+  </action>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionAdd">
+   <property name="text">
+    <string>Add</string>
+   </property>
+  </action>
+  <action name="actionSub">
+   <property name="text">
+    <string>Sub</string>
+   </property>
+  </action>
+  <action name="actionMult">
+   <property name="text">
+    <string>Mult</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

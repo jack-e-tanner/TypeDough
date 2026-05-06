@@ -23,6 +23,7 @@ qt_add_executable(TypeDough
     UI/wireitem.h UI/wireitem.cpp
     Core/Nodes/NodeTypes.h
     Core/Nodes/AllNodes.h
+    UI/errorutility.h
 )
 
 target_link_libraries(TypeDough

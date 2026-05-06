@@ -3,20 +3,35 @@
 
 #include <QGraphicsItem>
 #include <QPainter>
+#include <QObject>
+#include <QGraphicsSceneHoverEvent>
+#include <QGraphicsSceneMouseEvent>
 
-class NodeItem : public QGraphicsItem
+class MainWindow;
+
+class NodeItem : public QObject, public QGraphicsItem
 {
+    Q_OBJECT
+    Q_INTERFACES(QGraphicsItem)
+
 public:
     NodeItem(int id, QString name);
 
     QRectF boundingRect() const override;
-
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
     QPointF get_port_scene_pos(int port_id, bool is_input) const;
+
+signals:
+    void doubleClick(int id, QPointF screenPos);
+
 private:
     int m_id;
     QString m_name;
+    bool m_isHovered;
 };
 
 #endif // NODEITEM_H
