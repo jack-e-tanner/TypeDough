@@ -6,6 +6,7 @@
 #include <QObject>
 #include <QGraphicsSceneHoverEvent>
 #include <QGraphicsSceneMouseEvent>
+#include "portitem.h"
 
 class MainWindow;
 
@@ -19,14 +20,8 @@ public:
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;
 
     QPointF get_port_scene_pos(int port_id, bool is_input) const;
-    int get_clicked_port(QPointF local_pos, bool& is_output);
 
     inline const int getID() const { return m_id; }
     inline const QString getName() const { return m_name; }
@@ -37,19 +32,21 @@ public:
     }
 
 signals:
-    void startWireDrag(QPointF start_pos);
+    void startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
     void dragWire(QPointF current_scene_pos);
     void endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
 
+protected:
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+
 private:
+    void add_port(int port_id, bool is_output, QPointF local_pos);
+
     int m_id;
     QString m_name;
 
-    bool m_isHoveredOnNode;
-    bool m_isHoveredOnPort;
-    bool m_isDraggingWire = false;
-    int m_draggedPortId = -1;
-    bool m_draggedPortIsOutput = false;
+    bool m_isHovering;
 };
 
 #endif // NODEITEM_H

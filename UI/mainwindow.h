@@ -39,8 +39,8 @@ public slots:
     void show_node_options(int node_id, const QPoint& localPos);
     void show_context_menu(const QPoint& pos);
 
-    void on_startWireDrag(QPointF start_pos);
-    void on_DragWire(QPointF current_scene_pos);
+    void on_startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
+    void on_dragWire(QPointF current_scene_pos);
     void on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
 
 private:

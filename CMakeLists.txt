@@ -24,6 +24,7 @@ qt_add_executable(TypeDough
     Core/Nodes/NodeTypes.h
     Core/Nodes/AllNodes.h
     UI/errorutility.h
+    UI/portitem.h UI/portitem.cpp
 )
 
 target_link_libraries(TypeDough

@@ -3,6 +3,7 @@
 #include "errorutility.h"
 #include <QInputDialog>
 #include "Core/Nodes/AllNodes.h"
+#include "Core/core.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -53,7 +54,7 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
     NodeItem* visual_node = new NodeItem(id, label);
 
     connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_startWireDrag);
-    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_DragWire);
+    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_dragWire);
     connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_endWireDrag);
 
     visual_node->setPos(scene_pos);
@@ -199,7 +200,7 @@ void MainWindow::delete_node(int node_id) {
     m_scene->update();
 }
 
-void MainWindow::on_startWireDrag(QPointF start_pos) {
+void MainWindow::on_startWireDrag(int node_id, int port_id, bool is_output, QPointF pos) {
     m_temp_wire = new QGraphicsPathItem();
 
     QPen pen(Qt::white, 2, Qt::DashLine);
@@ -207,18 +208,18 @@ void MainWindow::on_startWireDrag(QPointF start_pos) {
 
     m_scene->addItem(m_temp_wire);
 
-    m_drag_start_pos = start_pos;
+    m_drag_start_pos = pos;
 
-    on_DragWire(start_pos);
+    on_dragWire(pos);
 }
 
-void MainWindow::on_DragWire(QPointF current_scene_pos) {
+void MainWindow::on_dragWire(QPointF pos) {
     if (!m_temp_wire) return;
 
     QPainterPath path;
     path.moveTo(m_drag_start_pos);
 
-    path.lineTo(current_scene_pos);
+    path.lineTo(pos);
 
     m_temp_wire->setPath(path);
 }
@@ -252,25 +253,8 @@ void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int sou
         QPointF local_drop = target_node->mapFromScene(drop_scene_pos);
 
         bool target_is_output;
-        int target_port = target_node->get_clicked_port(local_drop, target_is_output);
 
-        if (target_port != -1) {
-            if (is_output != target_is_output) {
-                GraphManager::Port from = {source_node, source_port};
-                GraphManager::Port to = {target_node->getID(), target_port};
-
-                if (!is_output) {
-
-                }
-
-                spawn_wire(from, to);
-
-                return;
-            }
-        }
     }
-
-    ErrorPopup::show(this, QString("Failed to remove node"), QString("drag failed"));
 }
 
 

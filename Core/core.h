@@ -2,6 +2,7 @@
 #define CORE_H
 
 #include <iostream>
+#include <QDebug>
 
 #define DOUGH_ASSERT(x, msg) { if (!(x)) { \
     std::cerr << "--- [DOUGH ASSERTION FAILED] ---" << std::endl; \
@@ -14,5 +15,7 @@
 } }
 
 #define DOUGH_INFO(x) { std::cout << "[DOUGH INFO] " << x << std::endl; }
+
+#define DOUGH_COORDS(...) qDebug() << "DOUGH_COORDS [" << __FILE__ << ":" << __LINE__ << "] -> " << __VA_ARGS__
 
 #endif // CORE_H
