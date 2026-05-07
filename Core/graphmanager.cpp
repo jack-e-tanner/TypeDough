@@ -8,7 +8,7 @@ bool GraphManager::delete_node(int id) {
     // Remove the node
     m_nodes.erase(id);
 
-    // Remove all connections to this node
+    // Remove all connections to and from this node
     for (auto& [node_id, node_entry] : m_nodes) {
         remove_helper(id, node_entry.incoming_connections, &Connection::source_id);
         remove_helper(id, node_entry.outgoing_connections, &Connection::source_id);
@@ -111,3 +111,11 @@ const std::string& GraphManager::get_node_name(int id) const {
 
     return it->second.node->get_name();
 }
+
+void GraphManager::set_node_name(int node_id, const std::string& name) {
+    auto it = m_nodes.find(node_id);
+
+    DOUGH_ASSERT(it != m_nodes.end(), "Attempted to get name of non-existent node");
+    it->second.node->set_name(name);
+}
+

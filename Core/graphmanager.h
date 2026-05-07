@@ -32,6 +32,7 @@ public:
     bool delete_node(int id);
 
     const std::string& get_node_name(int id) const;
+    void set_node_name(int node_id, const std::string& name);
 
     DoughValue get_node_output(int id, int port);
 

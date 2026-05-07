@@ -1,5 +1,4 @@
 #include "nodeitem.h"
-#include <QCursor>
 
 NodeItem::NodeItem(int id, QString name) :
     m_id(id), m_name(name) {
@@ -32,11 +31,6 @@ QPointF NodeItem::get_port_scene_pos(int port_id, bool is_input) const {
     qreal y = 40 + (port_id * 20);
 
     return mapToScene(QPointF(x, y));
-}
-
-void NodeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) {
-    emit doubleClick(m_id, event->scenePos());
-    QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 void NodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {

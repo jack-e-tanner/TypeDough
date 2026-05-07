@@ -1,8 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "errorutility.h"
-
-#include <iostream>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,9 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     m_view->setDragMode(QGraphicsView::NoDrag);
     m_view->setContextMenuPolicy(Qt::CustomContextMenu);
-    //connect(m_view, &QGraphicsView::customContextMenuRequested, this, &MainWindow::show_context_menu);
-
-    if(!spawn_node(NodeType::Add, QPointF(-100, 0))) std::cout << "WRONG";
+    connect(m_view, &QGraphicsView::customContextMenuRequested, this, &MainWindow::show_context_menu);
 
     setCentralWidget(m_view);
 }
@@ -28,13 +25,27 @@ MainWindow::~MainWindow() {
     delete m_ui;
 }
 
+void MainWindow::show_context_menu(const QPoint& pos) {
+    QGraphicsItem* item = m_view->itemAt(pos);
+
+    if (item) {
+        NodeItem* node = dynamic_cast<NodeItem*>(item);
+        if (node) {
+            QPoint globalPos = m_view->viewport()->mapToGlobal(pos);
+            show_node_options(node->getID(), globalPos);
+            return;
+        }
+    } else {
+        show_bg_context_menu(pos);
+    }
+}
+
+
 bool MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
     auto [id, label] = creation_helper(type);
 
     if (id == -1) return false;;
     NodeItem* visual_node = new NodeItem(id, label);
-
-    connect(visual_node, &NodeItem::doubleClick, this, &MainWindow::show_node_options);
 
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
@@ -49,6 +60,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         m_view->setDragMode(QGraphicsView::ScrollHandDrag);
         m_view->viewport()->setCursor(Qt::OpenHandCursor);
     }
+
+    QMainWindow::keyPressEvent(event);
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *event) {
@@ -58,10 +71,6 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
     }
 
     QMainWindow::keyReleaseEvent(event);
-}
-
-void mouseDoubleClickEvent(QMouseEvent *event) {
-
 }
 
 std::pair<int, QString> MainWindow::creation_helper(NodeType type) {
@@ -94,7 +103,7 @@ bool MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
     return true;
 }
 
-void MainWindow::show_context_menu(const QPoint& pos) {
+void MainWindow::show_bg_context_menu(const QPoint& pos) {
     QMenu menu(this);
 
     QMenu* addNodeMenu = menu.addMenu("Add Node");
@@ -118,16 +127,90 @@ void MainWindow::show_context_menu(const QPoint& pos) {
     }
 }
 
-void MainWindow::show_node_options(int node_id, const QPoint& screen_pos) {
-
-    std::cout << "RECEIVED EVENT\n\n\n\n\n\n\n\n";
+void MainWindow::show_node_options(int node_id, const QPoint& pos) {
     QMenu menu(this);
 
-    QMenu* renameActionMenu = menu.addMenu("Rename node");
-    QMenu* deleteActionMenu = menu.addMenu("Delete Node");
-    QMenu* addConnectionActionMenu = menu.addMenu("Add Connection");
+    menu.addAction("Rename node", this, [this, node_id] () { this->rename_node(node_id); });
+    menu.addAction("Delete node", this, [this, node_id] () { this->delete_node(node_id); });
 
-    QAction* selectedAction = menu.exec(m_view->mapToGlobal(screen_pos));
-
-
+    menu.exec(pos);
 }
+
+void MainWindow::rename_node(int node_id) {
+    auto node_it = m_visual_nodes.find(node_id);
+
+    if (node_it == m_visual_nodes.end()) {
+        ErrorPopup::show(this, QString("Failed to rename node"), QString("The node doesn't exist"));
+        return;
+    }
+
+    NodeItem* node = node_it->second;
+
+    bool ok;
+    QString new_name = QInputDialog::getText(this, "Rename Node", "Enter new name:",
+                                             QLineEdit::Normal, node->getName(), &ok);
+
+    if (ok && !new_name.trimmed().isEmpty()) {
+        node->set_name(new_name);
+        m_manager.set_node_name(node_id, new_name.toStdString());
+    }
+}
+
+void MainWindow::delete_node(int node_id) {
+    auto node_it = m_visual_nodes.find(node_id);
+
+    if (node_it == m_visual_nodes.end()) {
+        ErrorPopup::show(this, QString("Failed to remove node"), QString("The node doesn't exist"));
+        return;
+    }
+
+    auto it = m_wires.begin();
+    while (it != m_wires.end()) {
+        if ((*it)->getStartNode()->getID() == node_id || (*it)->getEndNode()->getID() == node_id) {
+            m_scene->removeItem(*it);
+
+            delete *it;
+
+            it = m_wires.erase(it);
+        }
+    }
+
+    NodeItem* node_to_kill = node_it->second;
+
+    m_scene->removeItem(node_to_kill);
+
+    delete node_to_kill;
+
+    m_visual_nodes.erase(node_it);
+
+    m_manager.delete_node(node_id);
+
+    m_scene->update();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

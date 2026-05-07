@@ -28,11 +28,18 @@ public:
     bool spawn_node(NodeType type, QPointF scene_pos);
     bool spawn_wire(GraphManager::Port from, GraphManager::Port to);
 
-    void show_context_menu(const QPoint& pos);
+    void delete_node(int node_id);
+    //bool delete_connection();
+    //void add_conection();
+    //void delete_connection();
+
+    void show_bg_context_menu(const QPoint& pos);
 
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
-    void show_node_options(int node_id, const QPoint& screen_pos);
+    void show_node_options(int node_id, const QPoint& localPos);
+    void show_context_menu(const QPoint& pos);
+    void rename_node(int node_id);
 
 private:
     std::pair<int, QString> creation_helper(NodeType type);
@@ -43,5 +50,6 @@ private:
 
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;
+    std::vector<WireItem*> m_wires;
 };
 #endif // MAINWINDOW_H

@@ -52,6 +52,7 @@ public:
 
     inline int get_id() const { return m_id; }
     inline const std::string& get_name() const { return m_name; }
+    inline void set_name(const std::string& name) { m_name = name; }
 protected:
     // Unique identifier for the node; auto-incremented by the graph when a node is added
     int m_id;

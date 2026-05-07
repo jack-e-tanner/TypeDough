@@ -19,15 +19,16 @@ public:
 
     QRectF boundingRect() const override;
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
 
     QPointF get_port_scene_pos(int port_id, bool is_input) const;
-
-signals:
-    void doubleClick(int id, QPointF screenPos);
-
+    inline const int getID() const { return m_id; }
+    inline const QString getName() const { return m_name; }
+    inline void set_name(const QString& name)  {
+        m_name = QString(name);
+        update();
+    }
 private:
     int m_id;
     QString m_name;
