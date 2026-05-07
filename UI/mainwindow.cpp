@@ -41,18 +41,24 @@ void MainWindow::show_context_menu(const QPoint& pos) {
 }
 
 
-bool MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
+void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
     auto [id, label] = creation_helper(type);
 
-    if (id == -1) return false;;
+    if (id == -1) {
+        ErrorPopup::show(this, QString("Failed to make node"), QString("The node type doesn't exist"));
+        return;
+    }
+
     NodeItem* visual_node = new NodeItem(id, label);
+
+    connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_start_wire_drag);
+    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_drag_wire);
+    connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_end_wire_drag);
 
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
 
     m_visual_nodes[id] = visual_node;
-
-    return true;
 }
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
@@ -85,22 +91,27 @@ std::pair<int, QString> MainWindow::creation_helper(NodeType type) {
     }
 }
 
-bool MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
+void MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
     auto from_it = m_visual_nodes.find(from.node_id);
     auto to_it = m_visual_nodes.find(to.node_id);
 
-    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end()) return false;
+    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end())
+        ErrorPopup::show(this, QString("Failed to make wire"), QString("The nodes doesn't exist"));
+        return;
 
-    if (!m_manager.add_connection(from, to)) return false;
+    if (!m_manager.add_connection(from, to)) {
+        ErrorPopup::show(this, QString("Failed to make wire"), QString("The nodes doesn't exist"));
+        return;
+    }
 
     WireItem* visual_wire = new WireItem(
         from_it->second, from.port_id,
         to_it->second, to.port_id
         );
 
-    m_scene->addItem(visual_wire);
+    m_wires.push_back(visual_wire);
 
-    return true;
+    m_scene->addItem(visual_wire);
 }
 
 void MainWindow::show_bg_context_menu(const QPoint& pos) {
@@ -115,23 +126,22 @@ void MainWindow::show_bg_context_menu(const QPoint& pos) {
 
     if (selectedAction == addAction) {
         QPointF scenePos = m_view->mapToScene(pos);
-        if(!(spawn_node(NodeType::Add, scenePos))) {
-            ErrorPopup::show(this, QString("Failed to add node"), QString("The node type is not found"));
-        }
+
+        spawn_node(NodeType::Add, scenePos);
+
     } else if (selectedAction == subAction) {
         QPointF scenePos = m_view->mapToScene(pos);
-        if(!(spawn_node(NodeType::Subtract, scenePos))) {
-            std::cout << "FAIL\n";
-            ErrorPopup::show(this, QString("Failed to add node"), QString("The node type is not found"));
-        }
+        spawn_node(NodeType::Subtract, scenePos);
     }
 }
 
 void MainWindow::show_node_options(int node_id, const QPoint& pos) {
     QMenu menu(this);
 
-    menu.addAction("Rename node", this, [this, node_id] () { this->rename_node(node_id); });
-    menu.addAction("Delete node", this, [this, node_id] () { this->delete_node(node_id); });
+    menu.addAction("Rename Node", this, [this, node_id] () { this->rename_node(node_id); });
+    menu.addAction("Delete Node", this, [this, node_id] () { this->delete_node(node_id); });
+    // TODO
+    //menu.addAction("Add Connection", this, [] () { this->spawn_wire()});
 
     menu.exec(pos);
 }
@@ -188,6 +198,73 @@ void MainWindow::delete_node(int node_id) {
     m_scene->update();
 }
 
+void MainWindow::on_start_wire_drag(int node_id, int port_id, bool is_output, QPointF start_pos) {
+    m_temp_wire = new QGraphicsPathItem();
+
+    QPen pen(Qt::white, 2, Qt::DashLine);
+    m_temp_wire->setPen(pen);
+
+    m_scene->addItem(m_temp_wire);
+
+    on_drag_wire(start_pos);
+}
+
+void MainWindow::on_drag_wire(QPointF current_scene_pos) {
+    if (!m_temp_wire) return;
+
+    QPainterPath path;
+    path.moveTo(m_drag_start_pos);
+
+    path.lineTo(current_scene_pos);
+
+    m_temp_wire->setPath(path);
+}
+
+void MainWindow::on_end_wire_drag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output) {
+    if (m_temp_wire) {
+        m_scene->removeItem(m_temp_wire);
+        delete m_temp_wire;
+        m_temp_wire = nullptr;
+    }
+
+    QGraphicsItem* top_item = m_scene->itemAt(drop_scene_pos, QTransform());
+
+    NodeItem* target_node = nullptr;
+
+    while (top_item) {
+        target_node = dynamic_cast<NodeItem*>(top_item);
+
+        if (target_node) {
+            break;
+        }
+
+        top_item = top_item->parentItem();
+    }
+
+    if (target_node) {
+        if (target_node->getID() == source_node) {
+            return;
+        }
+
+        QPointF local_drop = target_node->mapFromScene(drop_scene_pos);
+
+        bool target_is_output;
+        int target_port = target_node->get_clicked_port(local_drop, target_is_output);
+
+        if (target_port != -1) {
+            if (is_output != target_is_output) {
+                GraphManager::Port from = {source_node, source_port};
+                GraphManager::Port to = {target_node->getID(), target_port};
+
+                if (!is_output) {
+
+                }
+
+                spawn_wire(from, to);
+            }
+        }
+    }
+}
 
 
 

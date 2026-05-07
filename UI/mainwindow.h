@@ -25,21 +25,24 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-    bool spawn_node(NodeType type, QPointF scene_pos);
-    bool spawn_wire(GraphManager::Port from, GraphManager::Port to);
+    void spawn_node(NodeType type, QPointF scene_pos);
+    void spawn_wire(GraphManager::Port from, GraphManager::Port to);
 
-    void delete_node(int node_id);
-    //bool delete_connection();
-    //void add_conection();
-    //void delete_connection();
-
-    void show_bg_context_menu(const QPoint& pos);
-
+protected:
     void keyPressEvent(QKeyEvent *event) override;
     void keyReleaseEvent(QKeyEvent *event) override;
+
+public slots:
+    void delete_node(int node_id);
+    void rename_node(int node_id);
+
+    void show_bg_context_menu(const QPoint& pos);
     void show_node_options(int node_id, const QPoint& localPos);
     void show_context_menu(const QPoint& pos);
-    void rename_node(int node_id);
+
+    void on_start_wire_drag(int node_id, int port_id, bool is_output, QPointF start_pos);
+    void on_drag_wire(QPointF current_scene_pos);
+    void on_end_wire_drag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
 
 private:
     std::pair<int, QString> creation_helper(NodeType type);
@@ -51,5 +54,8 @@ private:
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;
     std::vector<WireItem*> m_wires;
+
+    QGraphicsPathItem* m_temp_wire = nullptr;
+    QPointF m_drag_start_pos;
 };
 #endif // MAINWINDOW_H
