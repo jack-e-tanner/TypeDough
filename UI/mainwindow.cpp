@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "errorutility.h"
 #include <QInputDialog>
+#include "Core/Nodes/AllNodes.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -51,9 +52,9 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
 
     NodeItem* visual_node = new NodeItem(id, label);
 
-    connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_start_wire_drag);
-    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_drag_wire);
-    connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_end_wire_drag);
+    connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_startWireDrag);
+    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_DragWire);
+    connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_endWireDrag);
 
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
@@ -198,7 +199,7 @@ void MainWindow::delete_node(int node_id) {
     m_scene->update();
 }
 
-void MainWindow::on_start_wire_drag(int node_id, int port_id, bool is_output, QPointF start_pos) {
+void MainWindow::on_startWireDrag(QPointF start_pos) {
     m_temp_wire = new QGraphicsPathItem();
 
     QPen pen(Qt::white, 2, Qt::DashLine);
@@ -206,10 +207,12 @@ void MainWindow::on_start_wire_drag(int node_id, int port_id, bool is_output, QP
 
     m_scene->addItem(m_temp_wire);
 
-    on_drag_wire(start_pos);
+    m_drag_start_pos = start_pos;
+
+    on_DragWire(start_pos);
 }
 
-void MainWindow::on_drag_wire(QPointF current_scene_pos) {
+void MainWindow::on_DragWire(QPointF current_scene_pos) {
     if (!m_temp_wire) return;
 
     QPainterPath path;
@@ -220,7 +223,7 @@ void MainWindow::on_drag_wire(QPointF current_scene_pos) {
     m_temp_wire->setPath(path);
 }
 
-void MainWindow::on_end_wire_drag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output) {
+void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output) {
     if (m_temp_wire) {
         m_scene->removeItem(m_temp_wire);
         delete m_temp_wire;
@@ -261,9 +264,13 @@ void MainWindow::on_end_wire_drag(QPointF drop_scene_pos, int source_node, int s
                 }
 
                 spawn_wire(from, to);
+
+                return;
             }
         }
     }
+
+    ErrorPopup::show(this, QString("Failed to remove node"), QString("drag failed"));
 }
 
 

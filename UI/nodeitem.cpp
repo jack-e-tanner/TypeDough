@@ -1,4 +1,5 @@
 #include "nodeitem.h"
+#include <iostream>
 
 NodeItem::NodeItem(int id, QString name) :
     m_id(id), m_name(name) {
@@ -36,12 +37,14 @@ QPointF NodeItem::get_port_scene_pos(int port_id, bool is_input) const {
 void NodeItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
     m_isHoveredOnNode = true;
     update();
+
     QGraphicsItem::hoverEnterEvent(event);
 }
 
 void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     m_isHoveredOnNode = false;
     update();
+
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
@@ -74,7 +77,8 @@ void NodeItem::mousePressEvent(QGraphicsSceneMouseEvent *event) {
             m_draggedPortIsOutput = is_output;
 
             QPointF start_pos = get_port_scene_pos(port_id, !is_output);
-            emit startWireDrag(m_id, port_id, is_output, start_pos);
+
+            emit startWireDrag(start_pos);
 
             event->accept();
             return;
@@ -96,7 +100,10 @@ void NodeItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void NodeItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if (m_isDraggingWire) {
         m_isDraggingWire = false;
+        m_isHoveredOnPort = false;
+
         emit endWireDrag(event->scenePos(), m_id, m_draggedPortId, m_draggedPortIsOutput);
+
         return;
     }
 

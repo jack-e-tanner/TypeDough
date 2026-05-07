@@ -37,7 +37,7 @@ public:
     }
 
 signals:
-    void startWireDrag(int node_id, int port_id, bool is_output, QPointF start_pos);
+    void startWireDrag(QPointF start_pos);
     void dragWire(QPointF current_scene_pos);
     void endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
 
