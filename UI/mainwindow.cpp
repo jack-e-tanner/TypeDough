@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     m_scene = new QGraphicsScene(this);
+    m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     m_view = new QGraphicsView(m_scene, this);
 
     m_view->setRenderHint(QPainter::Antialiasing);
@@ -184,7 +185,7 @@ void MainWindow::delete_node(int node_id) {
         if ((*it)->getStartNode()->getID() == node_id || (*it)->getEndNode()->getID() == node_id) {
             m_scene->removeItem(*it);
 
-            delete *it;
+            (*it)->deleteLater();
 
             it = m_wires.erase(it);
         } else {
@@ -196,7 +197,7 @@ void MainWindow::delete_node(int node_id) {
 
     m_scene->removeItem(node_to_kill);
 
-    delete node_to_kill;
+    node_to_kill->deleteLater();
 
     m_visual_nodes.erase(node_it);
 

@@ -4,11 +4,19 @@ NodeItem::NodeItem(int id, QString name) :
     m_id(id), m_name(name) {
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
+    setFlag(ItemSendsScenePositionChanges);
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
     add_port(0, false, QPointF(0, 40));
     add_port(0, true, QPointF(120, 40));
+}
+
+QVariant NodeItem::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if (change == ItemScenePositionHasChanged) {
+        emit moved();
+    }
+    return QGraphicsItem::itemChange(change, value);
 }
 
 void NodeItem::add_port(int port_id, bool is_output, QPointF local_pos) {

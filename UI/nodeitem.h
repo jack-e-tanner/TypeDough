@@ -33,9 +33,13 @@ public:
         update();
     }
 
+signals:
+    void moved();
+
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent *event) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 private:
     void add_port(int port_id, bool is_output, QPointF local_pos);
