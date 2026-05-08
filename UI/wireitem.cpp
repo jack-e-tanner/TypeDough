@@ -1,5 +1,6 @@
 #include "wireitem.h"
 #include <QPointF>
+#include <iostream>
 
 WireItem::WireItem(NodeItem* startNode, int startPort, NodeItem* endNode, int endPort)
     : m_startNode(startNode), m_endNode(endNode),
@@ -42,6 +43,7 @@ void WireItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 }
 
 void WireItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
+    std::cout << "HOVERENTER" << std::endl;
     m_isHovering = true;
     update();
 

@@ -1,25 +1,159 @@
-The Graph manager
-        ^
-        |
-        |
-        ⌄
-    Runtime
-        |
-        |
-        ⌄
-    Node class
+================================================================================
+                              TYPEDOUGH ARCHITECTURE
+================================================================================
 
-Pull based design:
-    1. Do a topological sort first to determine the order of evaluation of the nodes
-    2. Each node pulls its inputs from cached outputs of upstream nodes
-    3. Node writes it's own output
+There are two architectures living in this codebase. They are independent —
+the editor mutates the graph; the evaluator runs it.
 
-So the graph manager handles all the connections and ports and has the map of
-node id's and the actual node itself
+  1. EDITOR ARCHITECTURE (MVC)  - how the user builds a graph in the UI
+  2. EVALUATION ARCHITECTURE    - how a finished graph computes outputs
 
-The runtime is responsible for getting the nodes data from the graph manager which the
-node class uses. The runtime is only going to be used on the stack and then deleted,
-but each node will have an instance of a runtime only when evaluating needs to happen.
+--------------------------------------------------------------------------------
+1. EDITOR ARCHITECTURE  (Model - View - Controller)
+--------------------------------------------------------------------------------
 
-The node class has it's own evaluate implementation and uses runtime to get all the necessary
-information of itself.
+                       ┌─────────────────────────────┐
+                       │         MainWindow          │
+                       │   (chrome, menus, layout)   │
+                       └──────────────┬──────────────┘
+                                      │ owns
+                                      ▼
+   ┌──────────────────────────────────────────────────────────────────┐
+   │                          GraphEditor                             │
+   │                         (CONTROLLER)                             │
+   │                                                                  │
+   │   - owns the QGraphicsScene                                      │
+   │   - holds a pointer to GraphManager                              │
+   │   - translates view events  → model calls                        │
+   │   - reacts to model signals → spawns/destroys view items         │
+   └─────────────────┬──────────────────────────────┬─────────────────┘
+                     │                              │
+               user events ▲                  change signals ▲
+                     │     │                        │
+              spawn / kill ▼                 mutate state ▼
+                     │                              │
+                     ▼                              ▼
+   ┌────────────────────────────────┐  ┌────────────────────────────────┐
+   │         QGraphicsScene         │  │          GraphManager          │
+   │             (VIEW)             │  │            (MODEL)             │
+   │                                │  │                                │
+   │   NodeItem    WireItem         │  │   nodes (id → Node)            │
+   │   PortItem                     │  │   connections (incoming)       │
+   │   hover / drag state           │  │   cached outputs               │
+   │                                │  │   emits signals on change      │
+   └────────────────────────────────┘  └────────────────────────────────┘
+
+
+  Rules of the road
+  -----------------
+
+    * The MODEL never touches QGraphicsScene, NodeItem, PortItem, WireItem,
+      QPointF, or anything else from QtWidgets. It deals in node IDs,
+      logical ports, and connections only.
+
+    * The VIEW never calls GraphManager directly. It emits Qt signals
+      ("user dragged from this port to that one") and lets the controller
+      decide what to do.
+
+    * The CONTROLLER is the ONLY layer that touches both sides. It listens
+      to view events and model signals, and is the place where mutations
+      get committed.
+
+
+  Flow of "user drops a wire onto a port"
+  ---------------------------------------
+
+       PortItem::mouseRelease
+         emits  endWireDrag                              [view → controller]
+              │
+              ▼
+       GraphEditor::on_end_wire_drag
+         validates, then calls  manager.add_connection(from, to)
+                                                        [controller → model]
+              │
+              ▼
+       GraphManager::add_connection
+         stores the connection
+         emits  connection_added(from, to)              [model → controller]
+              │
+              ▼
+       GraphEditor::on_connection_added
+         creates a WireItem, adds it to the scene       [controller → view]
+              │
+              ▼
+       wire is visible
+
+  The view never knew the model was involved. The model never knew a wire
+  was drawn. Either side can be replaced without the other noticing.
+
+
+--------------------------------------------------------------------------------
+2. EVALUATION ARCHITECTURE  (pull-based, topo-sorted)
+--------------------------------------------------------------------------------
+
+                ┌──────────────────────────────────────┐
+                │             GraphManager             │
+                │                                      │
+                │   1. topological sort                │
+                │   2. for each node in order:         │
+                │        a. construct a NodeRuntime    │
+                │        b. node.evaluate(runtime)     │
+                │        c. cache the output           │
+                └────────────────┬─────────────────────┘
+                                 │  constructs per node, on stack
+                                 ▼
+                ┌──────────────────────────────────────┐
+                │             NodeRuntime              │
+                │     (transient evaluation context)   │
+                │                                      │
+                │   - pulls inputs from the manager's  │
+                │     cache of upstream outputs        │
+                │   - writes this node's output back   │
+                │   - destroyed at end of evaluate()   │
+                └────────────────┬─────────────────────┘
+                                 │  passed by reference
+                                 ▼
+                ┌──────────────────────────────────────┐
+                │                 Node                 │
+                │       (AddNode, SubNode, ...)        │
+                │                                      │
+                │   evaluate(runtime):                 │
+                │     a = runtime.input(0)             │
+                │     b = runtime.input(1)             │
+                │     runtime.set_output(0, a + b)     │
+                └──────────────────────────────────────┘
+
+
+  Why "pull"?
+
+    Each node, when evaluated, asks for its inputs rather than being
+    pushed values. Because the manager runs nodes in topological order,
+    every input a node asks for is already cached on the upstream node.
+
+
+  Why a transient NodeRuntime?
+
+    Zero per-node storage cost: the runtime is created on the stack,
+    used during one evaluate() call, then destroyed. Many constructions,
+    no allocations. The node never holds a runtime as a member.
+
+    Bonus: a node only sees the NodeRuntime API, never the GraphManager.
+    That keeps node implementations testable — a fake runtime is enough
+    to drive evaluate() in a unit test.
+
+
+--------------------------------------------------------------------------------
+Layer cheat-sheet
+--------------------------------------------------------------------------------
+
+  MODEL    Core/graphmanager.{h,cpp}
+           Core/noderuntime.{h,cpp}
+           Core/Nodes/node.{h,cpp}
+           Core/Nodes/<each node type>.{h,cpp}
+
+  VIEW     UI/nodeitem.{h,cpp}
+           UI/portitem.{h,cpp}
+           UI/wireitem.{h,cpp}
+
+  CONTROL  UI/grapheditor.{h,cpp}    (to come)
+           UI/mainwindow.{h,cpp}     (window chrome only)

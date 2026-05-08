@@ -5,9 +5,12 @@
 #include <unordered_map>
 #include <memory>
 #include <vector>
+#include <QObject>
 
-class GraphManager
+class GraphManager : QObject
 {
+    Q_OBJECT
+
 public:
     GraphManager() = default;
     ~GraphManager() = default;
