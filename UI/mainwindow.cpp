@@ -234,19 +234,14 @@ void MainWindow::on_dragWire(QPointF pos) {
     PortItem* port = qgraphicsitem_cast<PortItem*>(item_under_mouse);
 
     if (port && (port->getNodeID() != m_drag_source_node || port->getPortID() != m_drag_source_port)) {
-        std::cout << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n" << std::endl;
+        port->setHovering(true);
         m_hovered_port = port;
     } else {
-        std::cout << "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" << std::endl;
         m_hovered_port = nullptr;
     }
 }
 
 void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output) {
-    //std::fflush(stdout);
-    std::cout << "ENDWIREDRAG\n";
-    std::cout << "EXISTS: " << (m_hovered_port ? "YES" : "NO") << std::endl;
-
     if (m_temp_wire) {
         m_scene->removeItem(m_temp_wire);
         delete m_temp_wire;
@@ -254,17 +249,11 @@ void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int sou
     }
 
     if (m_hovered_port) {
-        std::cout << "PORTEXISTS\n" << std::endl;
+        m_hovered_port->setHovering(false);
 
-        std::cout << "GETNODEID: " << m_hovered_port->getNodeID() << std::endl;
-        std::cout << "GETPORTID: " << m_hovered_port->getPortID() << std::endl;
-        std::cout << "sourcenode: " << source_node << std::endl;
-        std::cout << "sourceport: " << source_port << std::endl;
-        std::cout << "output: " << (m_hovered_port->isOutput() ? "YES" : "NO") << std::endl;
         if (m_hovered_port->getNodeID() == source_node && m_hovered_port->getPortID() == source_port) return;
         if (m_hovered_port->isOutput() == is_output) return;
 
-        std::cout << "HERE" << std::endl;
         GraphManager::Port from;
         GraphManager::Port to;
 
@@ -281,7 +270,6 @@ void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int sou
 }
 
 void MainWindow::on_hoverStateChanged(PortItem* port, bool hovering) {
-    DOUGH_LOG("HOVER CHANGE -> Node:", port->getNodeID(), "Port:", port->getPortID(), "Entering:", hovering);
     if (hovering) {
         m_hovered_port = port;
     } else if (m_hovered_port == port) {

@@ -19,6 +19,10 @@ public:
     const int getPortID() const { return m_port_id; }
     const int getNodeID() const { return m_node_id; }
     const bool isOutput() const { return m_is_output; }
+    void setHovering(bool hovering) {
+        m_is_hovering = hovering;
+        update();
+    }
 
 signals:
     void startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
