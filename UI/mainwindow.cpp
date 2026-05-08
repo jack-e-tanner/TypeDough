@@ -52,10 +52,13 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
 
     NodeItem* visual_node = new NodeItem(id, label);
 
-    connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_startWireDrag);
-    connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_dragWire);
-    connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_endWireDrag);
-    connect(visual_node, &NodeItem::hoverStateChanged, this, &MainWindow::on_hoverStateChanged);
+    for (PortItem* port : visual_node->ports()) {
+        connect(port, &PortItem::startWireDrag, this, &MainWindow::on_startWireDrag);
+        connect(port, &PortItem::dragWire, this, &MainWindow::on_dragWire);
+        connect(port, &PortItem::endWireDrag, this, &MainWindow::on_endWireDrag);
+        connect(port, &PortItem::hoverStateChanged, this, &MainWindow::on_hoverStateChanged);
+
+    }
 
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
@@ -185,6 +188,8 @@ void MainWindow::delete_node(int node_id) {
             delete *it;
 
             it = m_wires.erase(it);
+        } else {
+            ++it;
         }
     }
 
@@ -231,7 +236,7 @@ void MainWindow::on_dragWire(QPointF pos) {
 
     m_temp_wire->show();
 
-    PortItem* port = qgraphicsitem_cast<PortItem*>(item_under_mouse);
+    PortItem* port = dynamic_cast<PortItem*>(item_under_mouse);
 
     if (port && (port->getNodeID() != m_drag_source_node || port->getPortID() != m_drag_source_port)) {
         port->setHovering(true);
@@ -276,21 +281,6 @@ void MainWindow::on_hoverStateChanged(PortItem* port, bool hovering) {
         m_hovered_port = nullptr;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

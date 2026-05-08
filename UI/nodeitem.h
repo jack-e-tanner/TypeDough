@@ -26,16 +26,12 @@ public:
     inline const int getID() const { return m_id; }
     inline const QString getName() const { return m_name; }
 
+    PortItem* ports();
+
     inline void set_name(const QString& name)  {
         m_name = QString(name);
         update();
     }
-
-signals:
-    void startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
-    void dragWire(QPointF current_scene_pos);
-    void endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
-    void hoverStateChanged(PortItem* port, bool hovering);
 
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;

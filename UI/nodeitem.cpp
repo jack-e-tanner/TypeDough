@@ -1,5 +1,4 @@
 #include "nodeitem.h"
-#include <iostream>
 
 NodeItem::NodeItem(int id, QString name) :
     m_id(id), m_name(name) {
@@ -15,18 +14,6 @@ NodeItem::NodeItem(int id, QString name) :
 void NodeItem::add_port(int port_id, bool is_output, QPointF local_pos) {
     PortItem* port = new PortItem(port_id, m_id, is_output, this);
     port->setPos(local_pos);
-
-    connect(port, &PortItem::startWireDrag, this, [this](int node_id, int port_id, bool is_output, QPointF pos) {
-        emit startWireDrag(node_id, port_id, is_output, pos);
-    });
-
-    connect(port, &PortItem::dragWire, this, &NodeItem::dragWire);
-
-    connect(port, &PortItem::endWireDrag, this, [this](QPointF pos, int p_id, bool is_out) {
-        emit endWireDrag(pos, m_id, p_id, is_out);
-    });
-
-    connect(port, &PortItem::hoverStateChanged, this, &NodeItem::hoverStateChanged);
 }
 
 QRectF NodeItem::boundingRect() const {

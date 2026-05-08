@@ -21,7 +21,8 @@ public:
     inline const int getEndPort() const { return m_endPort; }
 
 private:
-    NodeItem *m_startNode, *m_endNode;
+    NodeItem *m_startNode = nullptr;
+    NodeItem *m_endNode = nullptr;
     int m_startPort, m_endPort;
 };
 
