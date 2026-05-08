@@ -8,16 +8,16 @@ NodeItem::NodeItem(int id, QString name) :
     setAcceptHoverEvents(true);
     setAcceptedMouseButtons(Qt::LeftButton | Qt::RightButton);
 
-    add_port(0, false, QPointF(5, 45));
-    add_port(0, true, QPointF(125, 45));
+    add_port(0, false, QPointF(0, 40));
+    add_port(0, true, QPointF(120, 40));
 }
 
 void NodeItem::add_port(int port_id, bool is_output, QPointF local_pos) {
-    PortItem* port = new PortItem(port_id, is_output, this);
+    PortItem* port = new PortItem(port_id, m_id, is_output, this);
     port->setPos(local_pos);
 
-    connect(port, &PortItem::startWireDrag, this, [this](int p_id, bool is_out, QPointF pos) {
-        emit startWireDrag(m_id, p_id, is_out, pos);
+    connect(port, &PortItem::startWireDrag, this, [this](int node_id, int port_id, bool is_output, QPointF pos) {
+        emit startWireDrag(node_id, port_id, is_output, pos);
     });
 
     connect(port, &PortItem::dragWire, this, &NodeItem::dragWire);
@@ -25,6 +25,8 @@ void NodeItem::add_port(int port_id, bool is_output, QPointF local_pos) {
     connect(port, &PortItem::endWireDrag, this, [this](QPointF pos, int p_id, bool is_out) {
         emit endWireDrag(pos, m_id, p_id, is_out);
     });
+
+    connect(port, &PortItem::hoverStateChanged, this, &NodeItem::hoverStateChanged);
 }
 
 QRectF NodeItem::boundingRect() const {

@@ -6,6 +6,7 @@
 #include <QGraphicsView>
 #include "Core/graphmanager.h"
 #include "nodeitem.h"
+#include "portitem.h"
 #include "Core/Nodes/NodeTypes.h"
 #include "wireitem.h"
 #include "QKeyEvent"
@@ -42,6 +43,7 @@ public slots:
     void on_startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
     void on_dragWire(QPointF current_scene_pos);
     void on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
+    void on_hoverStateChanged(PortItem* port, bool hovering);
 
 private:
     std::pair<int, QString> creation_helper(NodeType type);
@@ -56,5 +58,9 @@ private:
 
     QGraphicsPathItem* m_temp_wire = nullptr;
     QPointF m_drag_start_pos;
+
+    PortItem* m_hovered_port = nullptr;
+    int m_drag_source_node = -1;
+    int m_drag_source_port = -1;
 };
 #endif // MAINWINDOW_H

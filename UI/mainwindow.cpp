@@ -3,7 +3,6 @@
 #include "errorutility.h"
 #include <QInputDialog>
 #include "Core/Nodes/AllNodes.h"
-#include "Core/core.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -56,6 +55,7 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
     connect(visual_node, &NodeItem::startWireDrag, this, &MainWindow::on_startWireDrag);
     connect(visual_node, &NodeItem::dragWire, this, &MainWindow::on_dragWire);
     connect(visual_node, &NodeItem::endWireDrag, this, &MainWindow::on_endWireDrag);
+    connect(visual_node, &NodeItem::hoverStateChanged, this, &MainWindow::on_hoverStateChanged);
 
     visual_node->setPos(scene_pos);
     m_scene->addItem(visual_node);
@@ -97,9 +97,10 @@ void MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
     auto from_it = m_visual_nodes.find(from.node_id);
     auto to_it = m_visual_nodes.find(to.node_id);
 
-    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end())
+    if (from_it == m_visual_nodes.end() || to_it == m_visual_nodes.end()) {
         ErrorPopup::show(this, QString("Failed to make wire"), QString("The nodes doesn't exist"));
         return;
+    }
 
     if (!m_manager.add_connection(from, to)) {
         ErrorPopup::show(this, QString("Failed to make wire"), QString("The nodes doesn't exist"));
@@ -207,8 +208,11 @@ void MainWindow::on_startWireDrag(int node_id, int port_id, bool is_output, QPoi
     m_temp_wire->setPen(pen);
 
     m_scene->addItem(m_temp_wire);
+    m_temp_wire->setAcceptedMouseButtons(Qt::NoButton);
 
     m_drag_start_pos = pos;
+    m_drag_source_node = node_id;
+    m_drag_source_port = port_id;
 
     on_dragWire(pos);
 }
@@ -218,45 +222,72 @@ void MainWindow::on_dragWire(QPointF pos) {
 
     QPainterPath path;
     path.moveTo(m_drag_start_pos);
-
     path.lineTo(pos);
-
     m_temp_wire->setPath(path);
+
+    m_temp_wire->hide();
+
+    QGraphicsItem* item_under_mouse = m_scene->itemAt(pos, QTransform());
+
+    m_temp_wire->show();
+
+    PortItem* port = qgraphicsitem_cast<PortItem*>(item_under_mouse);
+
+    if (port && (port->getNodeID() != m_drag_source_node || port->getPortID() != m_drag_source_port)) {
+        std::cout << "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n" << std::endl;
+        m_hovered_port = port;
+    } else {
+        std::cout << "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" << std::endl;
+        m_hovered_port = nullptr;
+    }
 }
 
 void MainWindow::on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output) {
+    //std::fflush(stdout);
+    std::cout << "ENDWIREDRAG\n";
+    std::cout << "EXISTS: " << (m_hovered_port ? "YES" : "NO") << std::endl;
+
     if (m_temp_wire) {
         m_scene->removeItem(m_temp_wire);
         delete m_temp_wire;
         m_temp_wire = nullptr;
     }
 
-    QGraphicsItem* top_item = m_scene->itemAt(drop_scene_pos, QTransform());
+    if (m_hovered_port) {
+        std::cout << "PORTEXISTS\n" << std::endl;
 
-    NodeItem* target_node = nullptr;
+        std::cout << "GETNODEID: " << m_hovered_port->getNodeID() << std::endl;
+        std::cout << "GETPORTID: " << m_hovered_port->getPortID() << std::endl;
+        std::cout << "sourcenode: " << source_node << std::endl;
+        std::cout << "sourceport: " << source_port << std::endl;
+        std::cout << "output: " << (m_hovered_port->isOutput() ? "YES" : "NO") << std::endl;
+        if (m_hovered_port->getNodeID() == source_node && m_hovered_port->getPortID() == source_port) return;
+        if (m_hovered_port->isOutput() == is_output) return;
 
-    while (top_item) {
-        target_node = dynamic_cast<NodeItem*>(top_item);
+        std::cout << "HERE" << std::endl;
+        GraphManager::Port from;
+        GraphManager::Port to;
 
-        if (target_node) {
-            break;
+        if (is_output) {
+            from = { .node_id = source_node, .port_id = source_port };
+            to   = { .node_id = m_hovered_port->getNodeID(), .port_id = m_hovered_port->getPortID() };
+        } else {
+            from = { .node_id = m_hovered_port->getNodeID(), .port_id = m_hovered_port->getPortID() };
+            to   = { .node_id = source_node, .port_id = source_port };
         }
 
-        top_item = top_item->parentItem();
-    }
-
-    if (target_node) {
-        if (target_node->getID() == source_node) {
-            return;
-        }
-
-        QPointF local_drop = target_node->mapFromScene(drop_scene_pos);
-
-        bool target_is_output;
-
+        spawn_wire(from, to);
     }
 }
 
+void MainWindow::on_hoverStateChanged(PortItem* port, bool hovering) {
+    DOUGH_LOG("HOVER CHANGE -> Node:", port->getNodeID(), "Port:", port->getPortID(), "Entering:", hovering);
+    if (hovering) {
+        m_hovered_port = port;
+    } else if (m_hovered_port == port) {
+        m_hovered_port = nullptr;
+    }
+}
 
 
 

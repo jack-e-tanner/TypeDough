@@ -16,6 +16,6 @@
 
 #define DOUGH_INFO(x) { std::cout << "[DOUGH INFO] " << x << std::endl; }
 
-#define DOUGH_COORDS(...) qDebug() << "DOUGH_COORDS [" << __FILE__ << ":" << __LINE__ << "] -> " << __VA_ARGS__
+#define DOUGH_LOG(...) qDebug() << "DOUGH_LOG [" << __FILE__ << ":" << __LINE__ << "] -> " << __VA_ARGS__
 
 #endif // CORE_H
