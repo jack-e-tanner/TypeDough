@@ -52,4 +52,16 @@ void NodeItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
+QList<PortItem*> NodeItem::ports() const {
+    QList<PortItem*> result;
+    for (QGraphicsItem* child : childItems()) {
+        if (auto* port = dynamic_cast<PortItem*>(child)) {
+            result.append(port);
+        }
+    }
+
+    return result;
+}
+
+
 

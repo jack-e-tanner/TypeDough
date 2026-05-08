@@ -44,7 +44,7 @@ void PortItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event) {
 void PortItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
     if (m_is_dragging) {
         m_is_dragging = false;
-        emit endWireDrag(event->scenePos(), m_port_id, m_is_output);
+        emit endWireDrag(event->scenePos(), m_node_id, m_port_id, m_is_output);
 
         event->accept();
         return;

@@ -26,7 +26,7 @@ public:
     inline const int getID() const { return m_id; }
     inline const QString getName() const { return m_name; }
 
-    PortItem* ports();
+    QList<PortItem*> ports() const;
 
     inline void set_name(const QString& name)  {
         m_name = QString(name);

@@ -57,7 +57,6 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
         connect(port, &PortItem::dragWire, this, &MainWindow::on_dragWire);
         connect(port, &PortItem::endWireDrag, this, &MainWindow::on_endWireDrag);
         connect(port, &PortItem::hoverStateChanged, this, &MainWindow::on_hoverStateChanged);
-
     }
 
     visual_node->setPos(scene_pos);
