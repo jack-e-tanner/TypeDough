@@ -1,19 +1,17 @@
 #ifndef NODEITEM_H
 #define NODEITEM_H
 
-#include <QGraphicsItem>
 #include <QPainter>
-#include <QObject>
 #include <QGraphicsSceneHoverEvent>
 #include <QGraphicsSceneMouseEvent>
+#include <QGraphicsObject>
 #include "portitem.h"
 
 class MainWindow;
 
-class NodeItem : public QObject, public QGraphicsItem
+class NodeItem : public QGraphicsObject
 {
     Q_OBJECT
-    Q_INTERFACES(QGraphicsItem)
 
 public:
     NodeItem(int id, QString name);
@@ -30,6 +28,11 @@ public:
 
     inline void set_name(const QString& name)  {
         m_name = QString(name);
+        update();
+    }
+
+    inline void set_isHovering(bool hovering) {
+        m_isHovering = hovering;
         update();
     }
 

@@ -47,6 +47,7 @@ public slots:
 
 private:
     std::pair<int, QString> creation_helper(NodeType type);
+    void delete_selected_wires();
 
     Ui::MainWindow* m_ui;
     QGraphicsScene* m_scene;

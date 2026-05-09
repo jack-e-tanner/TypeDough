@@ -1,4 +1,5 @@
 #include "portitem.h"
+#include "nodeitem.h"
 
 PortItem::PortItem(int port_id, int node_id, bool is_output, QGraphicsItem* parent)
     : QGraphicsObject(parent), m_port_id(port_id), m_is_output(is_output),
@@ -54,8 +55,12 @@ void PortItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event) {
 }
 
 void PortItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
-    m_is_hovering = true;
+    m_is_hovering = true;    
     update();
+
+    if (auto* node = static_cast<NodeItem*>(parentItem())) {
+        node->set_isHovering(false);
+    }
 
     emit hoverStateChanged(this, true);
     QGraphicsItem::hoverEnterEvent(event);
@@ -64,6 +69,10 @@ void PortItem::hoverEnterEvent(QGraphicsSceneHoverEvent *event) {
 void PortItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *event) {
     m_is_hovering = false;
     update();
+
+    if (auto* node = static_cast<NodeItem*>(parentItem())) {
+        node->set_isHovering(true);
+    }
 
     emit hoverStateChanged(this, false);
     QGraphicsItem::hoverLeaveEvent(event);

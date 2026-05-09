@@ -72,6 +72,10 @@ void MainWindow::keyPressEvent(QKeyEvent *event) {
         m_view->viewport()->setCursor(Qt::OpenHandCursor);
     }
 
+    if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
+        delete_selected_wires();
+    }
+
     QMainWindow::keyPressEvent(event);
 }
 
@@ -82,6 +86,22 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
     }
 
     QMainWindow::keyReleaseEvent(event);
+}
+
+void MainWindow::delete_selected_wires() {
+    auto selected = m_scene->selectedItems();
+    for (QGraphicsItem* item : selected) {
+        auto* wire = dynamic_cast<WireItem*>(item);
+        if (!wire) continue;
+
+        int dst_node = wire->getEndNode()->getID();
+        int dst_port = wire->getEndPort();
+        m_manager.remove_connection(dst_node, dst_port);
+
+        m_scene->removeItem(wire);
+        wire->deleteLater();
+        std::erase(m_wires, wire);
+    }
 }
 
 std::pair<int, QString> MainWindow::creation_helper(NodeType type) {

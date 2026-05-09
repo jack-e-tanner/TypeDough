@@ -1,8 +1,6 @@
 #ifndef WIREITEM_H
 #define WIREITEM_H
 
-#include <QGraphicsItem>
-#include <QPainter>
 #include "nodeitem.h"
 
 class WireItem : public QGraphicsObject
@@ -14,6 +12,8 @@ public:
     ~WireItem() = default;
 
     QRectF boundingRect() const override;
+
+    QPainterPath shape() const override;
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
