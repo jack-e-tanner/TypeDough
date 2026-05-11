@@ -26,6 +26,7 @@ qt_add_executable(TypeDough
     UI/errorutility.h
     UI/portitem.h UI/portitem.cpp
     Core/grapheditor.h Core/grapheditor.cpp
+    UI/graphview.h UI/graphview.cpp
 )
 
 target_link_libraries(TypeDough

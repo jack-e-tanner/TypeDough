@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
-#include <QGraphicsView>
+#include "graphview.h"
 #include "Core/graphmanager.h"
 #include "nodeitem.h"
 #include "portitem.h"
@@ -51,7 +51,7 @@ private:
 
     Ui::MainWindow* m_ui;
     QGraphicsScene* m_scene;
-    QGraphicsView* m_view;
+    GraphView* m_view;
 
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;

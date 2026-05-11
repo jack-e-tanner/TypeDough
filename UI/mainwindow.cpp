@@ -11,11 +11,10 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     m_scene = new QGraphicsScene(this);
-    m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
-    m_view = new QGraphicsView(m_scene, this);
+    m_scene->setSceneRect(-10000, -10000, 20000, 20000);    m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    m_view = new GraphView(m_scene, this);
 
     m_view->setRenderHint(QPainter::Antialiasing);
-    m_view->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     m_view->setDragMode(QGraphicsView::NoDrag);
     m_view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_view, &QGraphicsView::customContextMenuRequested, this, &MainWindow::show_context_menu);
