@@ -25,7 +25,7 @@ void NodeItem::add_port(int port_id, bool is_output, QPointF local_pos) {
 }
 
 QRectF NodeItem::boundingRect() const {
-    return QRectF(0, 0, 120, 80);
+    return QRectF(-3, -3, 126, 86);
 }
 
 void NodeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) {

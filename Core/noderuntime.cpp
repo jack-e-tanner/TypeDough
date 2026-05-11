@@ -1,5 +1,4 @@
 #include "noderuntime.h"
-#include <iostream>
 
 DoughValue NodeRuntime::get_input_from_port(int port) const {
     return 3;

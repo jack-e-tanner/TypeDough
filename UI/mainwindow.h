@@ -5,11 +5,11 @@
 #include <QGraphicsScene>
 #include "graphview.h"
 #include "Core/graphmanager.h"
-#include "nodeitem.h"
-#include "portitem.h"
+#include "UI/Items/nodeitem.h"
+#include "UI/Items/portitem.h"
 #include "Core/Nodes/NodeTypes.h"
-#include "wireitem.h"
-#include "QKeyEvent"
+#include "UI/Items/wireitem.h"
+#include <QKeyEvent>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

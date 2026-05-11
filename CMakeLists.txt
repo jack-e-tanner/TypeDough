@@ -19,14 +19,15 @@ qt_add_executable(TypeDough
     Core/graphmanager.h Core/graphmanager.cpp
     Core/noderuntime.h Core/noderuntime.cpp
     Core/core.h
-    UI/nodeitem.h UI/nodeitem.cpp
-    UI/wireitem.h UI/wireitem.cpp
+    UI/Items/nodeitem.h UI/Items/nodeitem.cpp
+    UI/Items/wireitem.h UI/Items/wireitem.cpp
     Core/Nodes/NodeTypes.h
     Core/Nodes/AllNodes.h
     UI/errorutility.h
-    UI/portitem.h UI/portitem.cpp
+    UI/Items/portitem.h UI/Items/portitem.cpp
     Core/grapheditor.h Core/grapheditor.cpp
     UI/graphview.h UI/graphview.cpp
+    UI/pinpoint.h UI/pinpoint.cpp
 )
 
 target_link_libraries(TypeDough

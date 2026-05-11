@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QGraphicsItem>
+#include <QGraphicsObject>
 #include <QPainter>
 #include <QGraphicsSceneMouseEvent>
 

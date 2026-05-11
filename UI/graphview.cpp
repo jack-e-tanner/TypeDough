@@ -1,5 +1,4 @@
 #include "graphview.h"
-#include <QScrollBar>
 #include <cmath>
 
 GraphView::GraphView(QGraphicsScene *scene, QWidget *parent)
@@ -10,6 +9,7 @@ GraphView::GraphView(QGraphicsScene *scene, QWidget *parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setDragMode(QGraphicsView::ScrollHandDrag);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 }
 
 void GraphView::wheelEvent(QWheelEvent *event) {

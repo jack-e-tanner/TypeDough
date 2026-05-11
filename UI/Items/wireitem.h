@@ -1,6 +1,9 @@
 #ifndef WIREITEM_H
 #define WIREITEM_H
 
+#include <QGraphicsObject>
+#include <QPainterPath>
+#include <QGraphicsSceneHoverEvent>
 #include "nodeitem.h"
 
 class WireItem : public QGraphicsObject

@@ -3,7 +3,6 @@
 
 #include <QPainter>
 #include <QGraphicsSceneHoverEvent>
-#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsObject>
 #include "portitem.h"
 

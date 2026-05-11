@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "errorutility.h"
 #include <QInputDialog>
+#include <QMenu>
 #include "Core/Nodes/AllNodes.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -11,7 +12,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_ui->setupUi(this);
 
     m_scene = new QGraphicsScene(this);
-    m_scene->setSceneRect(-10000, -10000, 20000, 20000);    m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
+    m_scene->setSceneRect(-10000, -10000, 20000, 20000);
+    m_scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     m_view = new GraphView(m_scene, this);
 
     m_view->setRenderHint(QPainter::Antialiasing);
