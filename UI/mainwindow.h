@@ -11,6 +11,7 @@
 #include "UI/Items/wireitem.h"
 #include <QKeyEvent>
 #include "UI/Items/pinpointitem.h"
+#include <QListWidget>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -36,19 +37,26 @@ protected:
 public slots:
     void delete_node(int node_id);
     void rename_node(int node_id);
+    void delete_pp(int node_id);
+    void rename_pp(int node_id);
 
     void show_bg_context_menu(const QPoint& pos);
     void show_node_options(int node_id, const QPoint& localPos);
     void show_context_menu(const QPoint& pos);
+    void show_pp_options(int pp_id, const QPoint& pos);
 
     void on_startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
     void on_dragWire(QPointF current_scene_pos);
     void on_endWireDrag(QPointF drop_scene_pos, int source_node, int source_port, bool is_output);
     void on_hoverStateChanged(PortItem* port, bool hovering);
 
+private slots:
+    void on_pp_clicked(QListWidgetItem* item);
+
 private:
     std::pair<int, QString> creation_helper(NodeType type);
     void delete_selected_wires();
+    QListWidgetItem* find_pp_row(int pp_id) const;
 
     Ui::MainWindow* m_ui;
     QGraphicsScene* m_scene;
@@ -56,9 +64,11 @@ private:
 
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;
-    std::unordered_map<int, PinpointItem*> m_pinpoints;
-    int m_next_pp_id = 0;
     std::vector<WireItem*> m_wires;
+
+    std::unordered_map<int, PinpointItem*> m_pps;
+    int m_next_pp_id = 0;
+    QListWidget* m_pp_list;
 
     QGraphicsPathItem* m_temp_wire = nullptr;
     QPointF m_drag_start_pos;

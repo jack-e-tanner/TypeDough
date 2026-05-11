@@ -11,6 +11,9 @@ class WireItem : public QGraphicsObject
     Q_OBJECT
 
 public:
+    enum { Type = UserType + 4 };
+    int type() const override { return Type; }
+
     WireItem(NodeItem* startNode, int startPort, NodeItem* endNode, int endPort);
     ~WireItem() = default;
 

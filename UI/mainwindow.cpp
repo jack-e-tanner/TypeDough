@@ -7,6 +7,9 @@
 #include "pinpoint.h"
 #include "Items/pinpointitem.h"
 #include "Core/Nodes/AllNodes.h"
+#include <QDockWidget>
+#include <QPixmap>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -24,6 +27,16 @@ MainWindow::MainWindow(QWidget *parent)
     m_view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_view, &QGraphicsView::customContextMenuRequested, this, &MainWindow::show_context_menu);
 
+    auto* dock = new QDockWidget("Pinpoints", this);
+    m_pp_list = new QListWidget(dock);
+    dock->setWidget(m_pp_list);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+
+    connect(m_pp_list, &QListWidget::itemClicked, this, &MainWindow::on_pp_clicked);
+
+    QMenu* viewMenu = menuBar()->addMenu("View");
+    viewMenu->addAction(dock->toggleViewAction());
+
     setCentralWidget(m_view);
 }
 
@@ -34,15 +47,25 @@ MainWindow::~MainWindow() {
 void MainWindow::show_context_menu(const QPoint& pos) {
     QGraphicsItem* item = m_view->itemAt(pos);
 
-    if (item) {
-        NodeItem* node = dynamic_cast<NodeItem*>(item);
-        if (node) {
-            QPoint globalPos = m_view->viewport()->mapToGlobal(pos);
-            show_node_options(node->getID(), globalPos);
-            return;
-        }
-    } else {
+    if (!item) {
         show_bg_context_menu(pos);
+        return;
+    }
+
+    switch (item->type()) {
+        case NodeItem::Type: {
+            auto* node = qgraphicsitem_cast<NodeItem*>(item);
+            show_node_options(node->getID(), m_view->viewport()->mapToGlobal(pos));
+            break;
+        }
+        case PinpointItem::Type: {
+            auto* pp = qgraphicsitem_cast<PinpointItem*>(item);
+            show_pp_options(pp->data()->id(), m_view->viewport()->mapToGlobal(pos));
+            break;
+        }
+        default: {
+            show_bg_context_menu(pos);
+        }
     }
 }
 
@@ -69,6 +92,17 @@ void MainWindow::spawn_node(NodeType type, QPointF scene_pos) {
 
     m_visual_nodes[id] = visual_node;
 }
+
+void MainWindow::on_pp_clicked(QListWidgetItem* item) {
+    int id = item->data(Qt::UserRole).toInt();
+    auto it = m_pps.find(id);
+    if (it == m_pps.end()) return;
+    const QPointF p = it->second->pos();
+    const qreal box = 200.0;
+    QRectF target(p.x() - box/2, p.y() - box/2, box, box);
+    m_view->fitInView(target, Qt::KeepAspectRatio);
+}
+
 
 void MainWindow::keyPressEvent(QKeyEvent *event) {
     if (event->modifiers() & Qt::ControlModifier) {
@@ -144,6 +178,12 @@ void MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
     m_scene->addItem(visual_wire);
 }
 
+static QIcon makeColorIcon(const QColor& color) {
+    QPixmap pix(16, 16);
+    pix.fill(color);
+    return QIcon(pix);
+}
+
 void MainWindow::show_bg_context_menu(const QPoint& pos) {
     const QPointF scenePos = m_view->mapToScene(pos);
 
@@ -169,7 +209,11 @@ void MainWindow::show_bg_context_menu(const QPoint& pos) {
             PinpointItem* pp_item = new PinpointItem(pp);
             pp_item->setPos(scenePos);
             m_scene->addItem(pp_item);
-            m_pinpoints[pp->id()] = pp_item;
+            m_pps[pp->id()] = pp_item;
+
+            auto* row = new QListWidgetItem(makeColorIcon(dlg.color()), dlg.name());
+            row->setData(Qt::UserRole, pp->id());
+            m_pp_list->addItem(row);
         }
     });
 
@@ -183,6 +227,63 @@ void MainWindow::show_node_options(int node_id, const QPoint& pos) {
     menu.addAction("Delete Node", this, [this, node_id] () { this->delete_node(node_id); });
 
     menu.exec(pos);
+}
+
+void MainWindow::show_pp_options(int pp_id, const QPoint& pos) {
+    QMenu menu(this);
+
+    menu.addAction("Rename Pinpoint", this, [this, pp_id] () { this->rename_pp(pp_id); });
+    menu.addAction("Delete Pinpoint", this, [this, pp_id] () { this->delete_pp(pp_id); });
+
+    menu.exec(pos);
+}
+
+QListWidgetItem* MainWindow::find_pp_row(int pp_id) const {
+    for (int i = 0; i < m_pp_list->count(); ++i) {
+        QListWidgetItem* row = m_pp_list->item(i);
+        if (row->data(Qt::UserRole).toInt() == pp_id) return row;
+    }
+    return nullptr;
+}
+
+void MainWindow::delete_pp(int pp_id) {
+    auto pp_it = m_pps.find(pp_id);
+    if (pp_it == m_pps.end()) {
+        ErrorPopup::show(this, QString("Failed to delete pinpoint"), QString("The pinpoint doesn't exist"));
+        return;
+    }
+
+    PinpointItem* pp_item = pp_it->second;
+    m_scene->removeItem(pp_item);
+    pp_item->deleteLater();
+
+    if (QListWidgetItem* row = find_pp_row(pp_id)) {
+        delete m_pp_list->takeItem(m_pp_list->row(row));
+    }
+
+    m_pps.erase(pp_it);
+}
+
+void MainWindow::rename_pp(int pp_id) {
+    auto pp_it = m_pps.find(pp_id);
+    if (pp_it == m_pps.end()) {
+        ErrorPopup::show(this, QString("Failed to rename pinpoint"), QString("The pinpoint doesn't exist"));
+        return;
+    }
+
+    PinpointItem* pp_item = pp_it->second;
+    bool ok;
+    QString new_name = QInputDialog::getText(this, "Rename Pinpoint", "Enter new name:",
+                                             QLineEdit::Normal, pp_item->data()->name(), &ok);
+
+    if (ok && !new_name.trimmed().isEmpty()) {
+        pp_item->data()->set_name(new_name);
+        pp_item->update();
+
+        if (QListWidgetItem* row = find_pp_row(pp_id)) {
+            row->setText(new_name);
+        }
+    }
 }
 
 void MainWindow::rename_node(int node_id) {

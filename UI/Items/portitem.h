@@ -12,6 +12,9 @@ class PortItem : public QGraphicsObject
     Q_OBJECT
 
 public:
+    enum { Type = UserType + 3 };
+    int type() const override { return Type; }
+
     PortItem(int port_id, int node_id, bool is_output, QGraphicsItem* parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;

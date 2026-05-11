@@ -14,6 +14,11 @@ public:
     QString name() const {return m_name; }
     QColor color() const { return m_color; }
     QPointF pos() const { return m_pos; }
+
+    inline void set_name(const QString& name)  {
+        m_name = QString(name);
+    }
+
 private:
     int m_id;
     QString m_name;

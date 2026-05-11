@@ -3,7 +3,6 @@
 
 #include <QGraphicsObject>
 
-
 class Pinpoint;
 
 class PinpointItem : public QGraphicsObject
@@ -11,6 +10,9 @@ class PinpointItem : public QGraphicsObject
     Q_OBJECT
 
 public:
+    enum { Type = UserType + 2 };
+    int type() const override { return Type; }
+
     static constexpr qreal HEAD_RADIUS = 15.0;
     static constexpr qreal TIP_OFFSET = 35.0;
     static constexpr qreal HOLE_RADIUS = 5.0;
@@ -21,6 +23,8 @@ public:
 
     explicit PinpointItem(Pinpoint* pp) : m_pp(pp) {}
     ~PinpointItem() override;
+
+    Pinpoint* data() const { return m_pp; }
 private:
     Pinpoint* m_pp;
 };

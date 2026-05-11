@@ -13,6 +13,9 @@ class NodeItem : public QGraphicsObject
     Q_OBJECT
 
 public:
+    enum { Type = UserType + 1 };
+    int type() const override { return Type; }
+
     NodeItem(int id, QString name);
 
     QRectF boundingRect() const override;
