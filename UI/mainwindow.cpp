@@ -1,8 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "errorutility.h"
+#include "Dialog/errorutility.h"
 #include <QInputDialog>
 #include <QMenu>
+#include "Dialog/pinpointdialog.h"
+#include "pinpoint.h"
 #include "Core/Nodes/AllNodes.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -142,24 +144,32 @@ void MainWindow::spawn_wire(GraphManager::Port from, GraphManager::Port to) {
 }
 
 void MainWindow::show_bg_context_menu(const QPoint& pos) {
+    const QPointF scenePos = m_view->mapToScene(pos);
+
     QMenu menu(this);
 
     QMenu* addNodeMenu = menu.addMenu("Add Node");
 
     QAction* addAction = addNodeMenu->addAction("Addition Node");
-    QAction* subAction = addNodeMenu->addAction("Subtraction Node");
-
-    QAction* selectedAction = menu.exec(m_view->mapToGlobal(pos));
-
-    if (selectedAction == addAction) {
-        QPointF scenePos = m_view->mapToScene(pos);
-
+    connect(addAction, &QAction::triggered, this, [this, scenePos]() {
         spawn_node(NodeType::Add, scenePos);
+    });
 
-    } else if (selectedAction == subAction) {
-        QPointF scenePos = m_view->mapToScene(pos);
+    QAction* subAction = addNodeMenu->addAction("Subtraction Node");
+    connect(subAction, &QAction::triggered, this, [this, scenePos]() {
         spawn_node(NodeType::Subtract, scenePos);
-    }
+    });
+
+    QAction* addPosAction = menu.addAction("Add Pinpoint");
+    connect(addPosAction, &QAction::triggered, this, [this, scenePos]() {
+        PinpointDialog dlg(this);
+        if (dlg.exec() == QDialog::Accepted) {
+            Pinpoint pp = Pinpoint(dlg.color(), dlg.name(), scenePos.toPoint());
+            // add mapping for pinpoints
+        }
+    });
+
+    menu.exec(m_view->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::show_node_options(int node_id, const QPoint& pos) {
