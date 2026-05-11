@@ -3,20 +3,22 @@
 
 #include <QString>
 #include <QColor>
-#include <QPoint>
+#include <QPointF>
 
 class Pinpoint
 {
 public:
-    Pinpoint(QColor color, QString name, QPoint pos);
+    Pinpoint(int id, const QString& name, const QColor& color, const QPointF& pos);
 
+    int id() const { return m_id; }
+    QString name() const {return m_name; }
+    QColor color() const { return m_color; }
+    QPointF pos() const { return m_pos; }
 private:
     int m_id;
     QString m_name;
     QColor m_color;
-    QPoint m_pos;
-
-    int m_next_id;
+    QPointF m_pos;
 };
 
 #endif // PINPOINT_H

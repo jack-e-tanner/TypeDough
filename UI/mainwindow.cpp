@@ -5,6 +5,7 @@
 #include <QMenu>
 #include "Dialog/pinpointdialog.h"
 #include "pinpoint.h"
+#include "Items/pinpointitem.h"
 #include "Core/Nodes/AllNodes.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -164,8 +165,11 @@ void MainWindow::show_bg_context_menu(const QPoint& pos) {
     connect(addPosAction, &QAction::triggered, this, [this, scenePos]() {
         PinpointDialog dlg(this);
         if (dlg.exec() == QDialog::Accepted) {
-            Pinpoint pp = Pinpoint(dlg.color(), dlg.name(), scenePos.toPoint());
-            // add mapping for pinpoints
+            Pinpoint* pp = new Pinpoint(m_next_pp_id++, dlg.name(), dlg.color(), scenePos);
+            PinpointItem* pp_item = new PinpointItem(pp);
+            pp_item->setPos(scenePos);
+            m_scene->addItem(pp_item);
+            m_pinpoints[pp->id()] = pp_item;
         }
     });
 
@@ -177,8 +181,6 @@ void MainWindow::show_node_options(int node_id, const QPoint& pos) {
 
     menu.addAction("Rename Node", this, [this, node_id] () { this->rename_node(node_id); });
     menu.addAction("Delete Node", this, [this, node_id] () { this->delete_node(node_id); });
-    // TODO
-    //menu.addAction("Add Connection", this, [] () { this->spawn_wire()});
 
     menu.exec(pos);
 }

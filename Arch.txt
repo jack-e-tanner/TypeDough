@@ -1,16 +1,10 @@
-================================================================================
-                              TYPEDOUGH ARCHITECTURE
-================================================================================
-
 There are two architectures living in this codebase. They are independent —
 the editor mutates the graph; the evaluator runs it.
 
-  1. EDITOR ARCHITECTURE (MVC)  - how the user builds a graph in the UI
-  2. EVALUATION ARCHITECTURE    - how a finished graph computes outputs
+  1. Editor Architecture (MVC)  - how the user builds a graph in the UI
+  2. Evaluation Architecture    - how a finished graph computes outputs
 
---------------------------------------------------------------------------------
-1. EDITOR ARCHITECTURE  (Model - View - Controller)
---------------------------------------------------------------------------------
+1. Editor Architecture  (Model - View - Controller)
 
                        ┌─────────────────────────────┐
                        │         MainWindow          │
@@ -43,53 +37,20 @@ the editor mutates the graph; the evaluator runs it.
    │                                │  │   emits signals on change      │
    └────────────────────────────────┘  └────────────────────────────────┘
 
+* The MODEL never touches QGraphicsScene, NodeItem, PortItem, WireItem,
+  QPointF, or anything else from QtWidgets. It deals in node IDs,
+  logical ports, and connections only.
 
-  Rules of the road
-  -----------------
+* The VIEW never calls GraphManager directly. It emits Qt signals
+  ("user dragged from this port to that one") and lets the controller
+  decide what to do.
 
-    * The MODEL never touches QGraphicsScene, NodeItem, PortItem, WireItem,
-      QPointF, or anything else from QtWidgets. It deals in node IDs,
-      logical ports, and connections only.
-
-    * The VIEW never calls GraphManager directly. It emits Qt signals
-      ("user dragged from this port to that one") and lets the controller
-      decide what to do.
-
-    * The CONTROLLER is the ONLY layer that touches both sides. It listens
-      to view events and model signals, and is the place where mutations
-      get committed.
+* The CONTROLLER is the ONLY layer that touches both sides. It listens
+  to view events and model signals, and is the place where mutations
+  get committed.
 
 
-  Flow of "user drops a wire onto a port"
-  ---------------------------------------
-
-       PortItem::mouseRelease
-         emits  endWireDrag                              [view → controller]
-              │
-              ▼
-       GraphEditor::on_end_wire_drag
-         validates, then calls  manager.add_connection(from, to)
-                                                        [controller → model]
-              │
-              ▼
-       GraphManager::add_connection
-         stores the connection
-         emits  connection_added(from, to)              [model → controller]
-              │
-              ▼
-       GraphEditor::on_connection_added
-         creates a WireItem, adds it to the scene       [controller → view]
-              │
-              ▼
-       wire is visible
-
-  The view never knew the model was involved. The model never knew a wire
-  was drawn. Either side can be replaced without the other noticing.
-
-
---------------------------------------------------------------------------------
-2. EVALUATION ARCHITECTURE  (pull-based, topo-sorted)
---------------------------------------------------------------------------------
+2. Evaluation Architecture  (pull-based, topo-sorted)
 
                 ┌──────────────────────────────────────┐
                 │             GraphManager             │
@@ -122,206 +83,3 @@ the editor mutates the graph; the evaluator runs it.
                 │     b = runtime.input(1)             │
                 │     runtime.set_output(0, a + b)     │
                 └──────────────────────────────────────┘
-
-
-  Why "pull"?
-
-    Each node, when evaluated, asks for its inputs rather than being
-    pushed values. Because the manager runs nodes in topological order,
-    every input a node asks for is already cached on the upstream node.
-
-
-  Why a transient NodeRuntime?
-
-    Zero per-node storage cost: the runtime is created on the stack,
-    used during one evaluate() call, then destroyed. Many constructions,
-    no allocations. The node never holds a runtime as a member.
-
-    Bonus: a node only sees the NodeRuntime API, never the GraphManager.
-    That keeps node implementations testable — a fake runtime is enough
-    to drive evaluate() in a unit test.
-
-
---------------------------------------------------------------------------------
-Layer cheat-sheet
---------------------------------------------------------------------------------
-
-  MODEL    Core/graphmanager.{h,cpp}
-           Core/noderuntime.{h,cpp}
-           Core/Nodes/node.{h,cpp}
-           Core/Nodes/<each node type>.{h,cpp}
-
-  VIEW     UI/nodeitem.{h,cpp}
-           UI/portitem.{h,cpp}
-           UI/wireitem.{h,cpp}
-
-  CONTROL  UI/grapheditor.{h,cpp}    (to come)
-           UI/mainwindow.{h,cpp}     (window chrome only)
-
-
-
-
-
-Plan: Pinpoint bookmarks (you implement, I review)
-
- Context
-
-Add a "pinpoint" feature: the user can drop colored, namedmarkersonthecanvas,andasidepanelliststhemasclickablechipsthatjumpthe
-viewtothatlocation.
-
-Userdesigndecisions(alreadyconfirmed):
--Bothrepresentations:amarkeronthecanvas(livesinscenecoords,pans/zoomswiththecanvas)ANDaclickablechipinasidepanel.
--Click-to-jumpcentersonly:nozoom-levelrestore.Pinpointstoresjustasceneposition.Simplerdata,simplernavigation.
-
-Architecture(followsyourMVCdirection)
-
-Pinpoint(data)PinpointItem(view)Sidepanel(view)
-────────────────────────────────────────────────────
-id,scene_pos,QGraphicsObjectQDockWidget
-color,namedrawsacoloredpin+QListWidget
-movableoncanvas(coloredchip+name)
-▲▲
-││
-└─────MainWindow───────┘
-(controller—fornow)
-ownsthestd::unordered_map<int,Pinpoint>
-spawns/destroysitems+listrows
-handlesadd/jump/delete
-
-Pinpointsarenavigation/UXstate,notgraphstate.Don'tputtheminGraphManager.Theyliveontheeditorside(MainWindownow,future
-GraphEditorlater).
-
-Files
-
-New
-
--UI/pinpoint.h—plainstruct:{intid;QPointFscene_pos;QColorcolor;QStringname;}.Nomethodsneeded.
--UI/pinpointitem.h/.cpp—classPinpointItem:publicQGraphicsObject.Storesintm_id+QColorm_color+QStringm_name.Paintsasmallfilled
-circle(orpinshape)+namelabelbelow.
-
-Modified
-
--UI/mainwindow.h—add:
--std::unordered_map<int,Pinpoint>m_pinpoints;(data)
--std::unordered_map<int,PinpointItem*>m_pinpoint_items;(viewitems)
--intm_next_pinpoint_id=0;
--QListWidget*m_pinpoint_list;(sidepanelcontents)
--Slots:add_pinpoint(QPointFscene_pos),jump_to_pinpoint(intid),delete_pinpoint(intid)
--UI/mainwindow.cpp—
--Inctor:createaQDockWidgetcontainingm_pinpoint_list,addtorightwithaddDockWidget(Qt::RightDockWidgetArea,dock)
--Inshow_bg_context_menu:add"AddPinpointHere"action
--Connectm_pinpoint_list->itemDoubleClicked→jump_to_pinpoint
-
-Implementationtips
-
-Addingapinpoint
-
-Reusethedialogpatternfromrename_node(usesQInputDialog::getText).Forcolor,useQColorDialog::getColor(Qt::yellow,this)—returnsan
-invalidQColoriftheusercancels,socheck.isValid().
-
-void MainWindow::add_pinpoint(QPointFscene_pos){
-boolok;
-QStringname=QInputDialog::getText(this,"NewPinpoint","Name:",
-QLineEdit::Normal,"",&ok);
-if(!ok||name.isEmpty())return;
-
-QColorcolor=QColorDialog::getColor(Qt::yellow,this,"PinpointColor");
-if(!color.isValid())return;
-
-intid=m_next_pinpoint_id++;
-m_pinpoints[id]={id,scene_pos,color,name};
-
-//createviewitem,addtoscene
-//addrowtom_pinpoint_list(storeidwithQListWidgetItem::setData(Qt::UserRole,id))
-}
-
-Jumpingtoapinpoint
-
-Onelineontheview:
-m_view->centerOn(m_pinpoints[id].scene_pos);
-That'sit—QGraphicsView::centerOnhandlesthemath.Zoomlevelisuntouched.
-
-TomapalistrowbacktoapinpointID,storetheidontheQListWidgetItemwhenyoucreateit:
-auto*row=newQListWidgetItem(name);
-row->setData(Qt::UserRole,id);
-row->setIcon(make_color_icon(color));//16×16QPixmapfilledwithcolor
-m_pinpoint_list->addItem(row);
-Thenintheslot:intid=item->data(Qt::UserRole).toInt();.
-
-Right-click→AddPinpointHere
-
-Inshow_bg_context_menu,theclickpositionisalreadypassedinasaQPoint(viewportcoords).Converttoscenewithm_view->mapToScene(pos)
-beforestoring.Lookathownodesarespawnedfortheexactpattern.
-
-PinpointItemessentials
-
-FollowtheNodeItem/WireItempattern:
-classPinpointItem:publicQGraphicsObject{
-Q_OBJECT
-public:
-PinpointItem(intid,QColorcolor,QStringname);
-QRectFboundingRect()const override;
-void paint(QPainter*,const QStyleOptionGraphicsItem*,QWidget*)override;
-signals:
-void moved();//soyoucanupdatem_pinpoints[id].scene_pos
-protected:
-QVariantitemChange(GraphicsItemChangechange,const QVariant&value)override;
-private:
-intm_id;
-QColorm_color;
-QStringm_name;
-};
-Inthector:setFlag(ItemIsMovable);setFlag(ItemIsSelectable);setFlag(ItemSendsScenePositionChanges);—sametrioasNodeItem.
-
-InitemChange,whenpositionchanges,emitmoved().InMainWindow,connectthatsignaltoaslotthatwritesthenewpositionbackinto
-m_pinpoints[id].scene_pos.(Otherwisedraggingthemarkeronthecanvasupdatesthevisualbutnotthesaveddata,andjumpingsnapsbacktothe
-oldposition.)
-
-Deletion
-
-Reuseyourexistingpatternfromdelete_node:removeItemfromscene,deleteLater()theQGraphicsObject,erasefrommap.Plusremovethematching
-rowfromm_pinpoint_list(iteraterows,findtheonewhoseQt::UserRole==id,takeItemit).
-
-HookintoyourexistingkeyPressEventDelete/Backspacebranch—extenddelete_selected_wiresintoamoregeneraldelete_selectedthatalso
-handlesselectedpinpoints.
-
-Patternstocopyfromyourexistingcode
-
-┌──────────────────────────────────────────────────────────┬───────────────────────────────┐
-│Need│Existingreference│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│Spawningaviewitem+trackingitinamap│MainWindow::spawn_node│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│Cleanup(removefromscene,deleteLater,erasefrommap)│MainWindow::delete_node│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│Right-clickcontextmenuoncanvas│show_bg_context_menu│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│Modaldialogfortextentry│rename_node│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│QGraphicsObjectwithmovement-emits-signalpattern│NodeItem(itemChange→moved)│
-├──────────────────────────────────────────────────────────┼───────────────────────────────┤
-│Hover+selectionpainting│NodeItem::paint│
-└──────────────────────────────────────────────────────────┴───────────────────────────────┘
-
-Commonpitfallstowatchfor
-
-1.Storingscreencoordsinsteadofscenecoords.Thepinmustrememberscenecoordinates.Ifyoustoreviewportcoordsfromacontextmenu
-click,dom_view->mapToScene(viewport_pos)first.
-2.Notsyncingpositionbacktothemodelafterdrag.Withoutthemoved→"updatem_pinpoints[id]"wiring,draggingthemarkervisuallymovesit
-butjumpingusesthestalestoredposition.
-3.ForgettingprepareGeometryChange() ifthemarkerresizes.Ifyourenderthenameaspartoftheitem,theboundingrectchangeswhenthename
-changes—samegotchathatbityouonWireItem.
-4.Memoryleaksondelete.ThePinpointisinamapbyvalue(fine),butthePinpointItem*needsdeleteLater()afterremoveItem.Don'tdelete
-directly.
-5.Z-ordering.PinsprobablywantsetZValue(1)(abovenodes)sothey'renotburied.
-
-Verificationwhenyou'redone
-
-1.Right-clickemptycanvas→"AddPinpointHere"→name+colordialogs→markerappears,chipshowsinsidepanelwithcoloredswatch.
-2.Pan/zoom—thecanvasmarkerpansandzoomswiththecanvas;thesidechipstaysput.
-3.Double-clickthechip→viewcentersonthemarker.
-4.Dragthecanvasmarkertoanewspot→double-clickchip→viewcentersonthenewspot(provesmodelisbeingupdatedondrag).
-│5.Selectmarker+pressDelete→markergonefromcanvasANDchipgonefromsidepanel.│
-││
-│Pingmewhenyou'vegotafirstpassandI'llreview.│
-╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯

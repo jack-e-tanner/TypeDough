@@ -1,6 +1,4 @@
 #include "pinpoint.h"
 
-Pinpoint::Pinpoint(QColor color, QString name, QPoint pos)
-    : m_name(name), m_color(color), m_pos(pos) {
-    m_id = ++m_next_id;
-}
+Pinpoint::Pinpoint(int id, const QString& name, const QColor& color, const QPointF& pos)
+    : m_id(id), m_name(name), m_color(color), m_pos(pos) {}

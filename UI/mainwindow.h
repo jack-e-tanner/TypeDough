@@ -10,6 +10,7 @@
 #include "Core/Nodes/NodeTypes.h"
 #include "UI/Items/wireitem.h"
 #include <QKeyEvent>
+#include "UI/Items/pinpointitem.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -55,6 +56,8 @@ private:
 
     GraphManager m_manager;
     std::unordered_map<int, NodeItem*> m_visual_nodes;
+    std::unordered_map<int, PinpointItem*> m_pinpoints;
+    int m_next_pp_id = 0;
     std::vector<WireItem*> m_wires;
 
     QGraphicsPathItem* m_temp_wire = nullptr;
