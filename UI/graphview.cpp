@@ -8,8 +8,9 @@ GraphView::GraphView(QGraphicsScene *scene, QWidget *parent)
 
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setDragMode(QGraphicsView::ScrollHandDrag);
+    setDragMode(QGraphicsView::NoDrag);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    setFocusPolicy(Qt::StrongFocus);
 }
 
 void GraphView::wheelEvent(QWheelEvent *event) {
@@ -25,4 +26,26 @@ void GraphView::wheelEvent(QWheelEvent *event) {
 
     scale(factor, factor);
     event->accept();
+}
+
+void GraphView::keyPressEvent(QKeyEvent *event) {
+    if (event->modifiers() & Qt::ControlModifier) {
+        setDragMode(QGraphicsView::ScrollHandDrag);
+        viewport()->setCursor(Qt::OpenHandCursor);
+    }
+
+    if (event->key() == Qt::Key_Delete || event->key() == Qt::Key_Backspace) {
+        emit deleteRequested();
+    }
+
+    QGraphicsView::keyPressEvent(event);
+}
+
+void GraphView::keyReleaseEvent(QKeyEvent *event) {
+    if (!(event->modifiers() & Qt::ControlModifier)) {
+        setDragMode(QGraphicsView::NoDrag);
+        viewport()->setCursor(Qt::ArrowCursor);
+    }
+
+    QGraphicsView::keyReleaseEvent(event);
 }
