@@ -11,36 +11,34 @@ struct DoughValueMapEntry;
 struct DoughValueTable;
 struct DoughValueVector;
 
-struct DoughValueTable {
+struct LuaTable {
     std::vector<DoughValue> array;
 
     // luau map, compile only, todo: may remove
-    std::vector<DoughValueMapEntry> map;
+    std::vector<LuaMapEntry> map;
 };
 
 // luau vector, , todo: may remove
-struct DoughValueVector {
+struct LuaVector {
     double x;
     double y;
     double z;
 };
 
-struct DoughValue: std::variant<
+struct DoughValue : std::variant<
     int,
     float,
     std::string,
     bool,
-    DoughValueTable,
-    DoughValueVector
+    LuaTable,
+    LuaVector
 > {
     using variant::variant;
 };
 
-struct DoughValueMapEntry {
+struct LuaMapEntry {
     DoughValue key;
     DoughValue value;
 };
-
-
 
 #endif // DOUGHVALUE_H
