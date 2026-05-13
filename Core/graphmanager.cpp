@@ -11,7 +11,6 @@ bool GraphManager::delete_node(int id) {
     // Remove all connections to and from this node
     for (auto& [node_id, node_entry] : m_nodes) {
         remove_helper(id, node_entry.incoming_connections, &Connection::source_id);
-        remove_helper(id, node_entry.outgoing_connections, &Connection::source_id);
     }
 
     return true;
