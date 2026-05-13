@@ -4,12 +4,14 @@
 #include <variant>
 #include <string>
 #include <vector>
+#include <memory>
 
 /** DoughValue is the base type */
 struct DoughValue;
-struct DoughValueMapEntry;
-struct DoughValueTable;
-struct DoughValueVector;
+struct LuaMapEntry;
+struct LuaTable;
+struct LuaVector;
+struct DoughValueNull;
 
 struct LuaTable {
     std::vector<DoughValue> array;
@@ -25,15 +27,26 @@ struct LuaVector {
     double z;
 };
 
-struct DoughValue : std::variant<
-    int,
-    float,
-    std::string,
-    bool,
-    LuaTable,
-    LuaVector
-> {
-    using variant::variant;
+struct DoughValueNull {};
+
+struct DoughValue {
+    std::variant<
+        int,
+        float,
+        std::string,
+        bool,
+        std::unique_ptr<LuaTable>,
+        LuaVector,
+        DoughValueNull
+    > value;
+
+    DoughValue add(DoughValue other) {
+        DoughValue result = DoughValue {
+            .value = DoughValueNull {}
+        };
+        // TODO
+        return result;
+    }
 };
 
 struct LuaMapEntry {
