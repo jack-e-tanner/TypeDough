@@ -1,16 +1,13 @@
 #ifndef NODERUNTIME_H
 #define NODERUNTIME_H
 
-#include <variant>
-#include <string>
+#include "Input/doughvalue.h"
 
 /**
  * Plan is in graphmanager function create an instane of NodeRuntime on stack
  * when evaluating a node, then just delete the noderuntime, so zero storage,
  * however it could be constructed lots of times
  */
-
-using DoughValue = std::variant<int, float, std::string, bool>;
 
 class GraphManager;
 
