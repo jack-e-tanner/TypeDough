@@ -2,10 +2,6 @@
 #include "UI/pinpoint.h"
 #include <QPainter>
 
-PinpointItem::~PinpointItem() {
-    delete m_pp;
-}
-
 QRectF PinpointItem::boundingRect() const {
     constexpr qreal pad = 2.0;
     return QRectF(
@@ -45,4 +41,14 @@ void PinpointItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setBrush(Qt::transparent);
     painter->setPen(Qt::NoPen);
     painter->drawEllipse(QPointF(0, 0), HOLE_RADIUS, HOLE_RADIUS);
+}
+
+void PinpointItem::set_name(const QString& name) {
+    m_pp->set_name(name);
+    update();
+}
+
+void PinpointItem::set_color(const QColor& color) {
+    m_pp->set_color(color);
+    update();
 }

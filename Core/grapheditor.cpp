@@ -215,23 +215,20 @@ void GraphEditor::edit_pp(int pp_id) {
 
     PinpointItem* pp_item = pp_it->second;
 
-    PinpointDialog dlg(m_view, "Edit Name:", pp_item->data()->color());
+    PinpointDialog dlg(m_view, "Edit Pinpoint", pp_item->data()->name(), pp_item->data()->color());
 
-    if (dlg.exec() == QDialog::Accepted) {
+    if (dlg.exec() != QDialog::Accepted) return;
 
+    const QString new_name = dlg.name().trimmed();
+    if (new_name.isEmpty()) return;
+
+    pp_item->set_name(new_name);
+    pp_item->set_color(dlg.color());
+
+    if (QListWidgetItem* row = find_pp_row(pp_id)) {
+        row->setText(new_name);
+        row->setIcon(makeColorIcon(dlg.color()));
     }
-    /*bool ok;
-    QString new_name = QInputDialog::getText(m_view, "Rename Pinpoint", "Enter new name:",
-                                             QLineEdit::Normal, pp_item->data()->name(), &ok);
-
-    if (ok && !new_name.trimmed().isEmpty()) {
-        pp_item->data()->set_name(new_name);
-        pp_item->update();
-
-        if (QListWidgetItem* row = find_pp_row(pp_id)) {
-            row->setText(new_name);
-        }
-    }*/
 }
 
 void GraphEditor::rename_node(int node_id) {

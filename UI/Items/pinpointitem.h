@@ -2,8 +2,9 @@
 #define PINPOINTITEM_H
 
 #include <QGraphicsObject>
-
-class Pinpoint;
+#include <memory>
+#include "UI/pinpoint.h"
+//class Pinpoint;
 
 class PinpointItem : public QGraphicsObject
 {
@@ -22,9 +23,11 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
     explicit PinpointItem(Pinpoint* pp) : m_pp(pp) {}
-    ~PinpointItem() override;
 
     const Pinpoint* data() const { return m_pp.get(); }
+
+    void set_name(const QString& name);
+    void set_color(const QColor& color);
 private:
     std::unique_ptr<Pinpoint> m_pp;
 };

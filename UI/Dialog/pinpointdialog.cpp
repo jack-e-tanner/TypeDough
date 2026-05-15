@@ -2,7 +2,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 
-PinpointDialog::PinpointDialog(QWidget* parent, QString text, QColor color)
+PinpointDialog::PinpointDialog(QWidget* parent, const QString& title, const QString& name, const QColor& color)
     : QDialog(parent) {
     auto addColor = [this](const QString& label, const QColor& col) {
         QPixmap pix(16, 16);
@@ -10,15 +10,15 @@ PinpointDialog::PinpointDialog(QWidget* parent, QString text, QColor color)
         m_colorCombo->addItem(QIcon(pix), label, QVariant::fromValue(col));
     };
 
-    setWindowTitle("Add Pinpoint");
+    setWindowTitle(title);
 
     auto* layout = new QFormLayout(this);
 
     m_nameEdit = new QLineEdit(this);
-    m_nameEdit->setText("Pinpoint");
+    m_nameEdit->setText(name);
     m_nameEdit->selectAll();
     m_nameEdit->setPlaceholderText("Pinpoint name");
-    layout->addRow(text, m_nameEdit);
+    layout->addRow("Name:", m_nameEdit);
 
     m_colorCombo = new QComboBox(this);
     addColor("White",Qt::white);
@@ -38,6 +38,12 @@ PinpointDialog::PinpointDialog(QWidget* parent, QString text, QColor color)
     addColor("Light Gray",  Qt::lightGray);
     addColor("Gray",Qt::gray);
     addColor("Dark Gray",Qt::darkGray);
+
+    int idx = m_colorCombo->findData(QVariant::fromValue(color));
+    if (idx >= 0) {
+        m_colorCombo->setCurrentIndex(idx);
+    }
+
     layout->addRow("Color:", m_colorCombo);
 
     auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);

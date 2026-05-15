@@ -16,7 +16,11 @@ public:
     QPointF pos() const { return m_pos; }
 
     inline void set_name(const QString& name)  {
-        m_name = QString(name);
+        m_name = name;
+    }
+
+    inline void set_color(const QColor& color) {
+        m_color = color;
     }
 
 private:
