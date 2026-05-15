@@ -31,6 +31,7 @@ qt_add_executable(TypeDough
     UI/pinpoint.h UI/pinpoint.cpp
     UI/Dialog/pinpointdialog.h UI/Dialog/pinpointdialog.cpp
     UI/Items/pinpointitem.h UI/Items/pinpointitem.cpp
+    Core/Input/doughvalue.h
 )
 
 target_link_libraries(TypeDough

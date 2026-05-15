@@ -23,7 +23,6 @@ public:
         m_nodes.emplace(id, NodeEntry {
             .node = std::move(node),
             .incoming_connections = {},
-            .outgoing_connections = {} ,
             .output = {}
         });
 
@@ -63,7 +62,6 @@ private:
     struct NodeEntry {
         std::unique_ptr<Node> node; // instance of the node
         std::vector<Connection> incoming_connections; // connections feeding into this node
-        std::vector<Connection> outgoing_connections; // connections feeding out of this node
         std::vector<DoughValue> output; // cached output values for this node, indexed by output port
     };
 
