@@ -174,7 +174,7 @@ void GraphEditor::show_node_options(int node_id, const QPoint& pos) {
 void GraphEditor::show_pp_options(int pp_id, const QPoint& pos) {
     QMenu menu(m_view);
 
-    menu.addAction("Rename Pinpoint", this, [this, pp_id]() { this->rename_pp(pp_id); });
+    menu.addAction("Edit Pinpoint", this, [this, pp_id]() { this->edit_pp(pp_id); });
     menu.addAction("Delete Pinpoint", this, [this, pp_id]() { this->delete_pp(pp_id); });
 
     menu.exec(pos);
@@ -206,7 +206,7 @@ void GraphEditor::delete_pp(int pp_id) {
     m_pps.erase(pp_it);
 }
 
-void GraphEditor::rename_pp(int pp_id) {
+void GraphEditor::edit_pp(int pp_id) {
     auto pp_it = m_pps.find(pp_id);
     if (pp_it == m_pps.end()) {
         ErrorPopup::show(m_view, QString("Failed to rename pinpoint"), QString("The pinpoint doesn't exist"));
@@ -214,7 +214,13 @@ void GraphEditor::rename_pp(int pp_id) {
     }
 
     PinpointItem* pp_item = pp_it->second;
-    bool ok;
+
+    PinpointDialog dlg(m_view, "Edit Name:", pp_item->data()->color());
+
+    if (dlg.exec() == QDialog::Accepted) {
+
+    }
+    /*bool ok;
     QString new_name = QInputDialog::getText(m_view, "Rename Pinpoint", "Enter new name:",
                                              QLineEdit::Normal, pp_item->data()->name(), &ok);
 
@@ -225,7 +231,7 @@ void GraphEditor::rename_pp(int pp_id) {
         if (QListWidgetItem* row = find_pp_row(pp_id)) {
             row->setText(new_name);
         }
-    }
+    }*/
 }
 
 void GraphEditor::rename_node(int node_id) {

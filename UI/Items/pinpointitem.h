@@ -24,9 +24,9 @@ public:
     explicit PinpointItem(Pinpoint* pp) : m_pp(pp) {}
     ~PinpointItem() override;
 
-    Pinpoint* data() const { return m_pp; }
+    const Pinpoint* data() const { return m_pp.get(); }
 private:
-    Pinpoint* m_pp;
+    std::unique_ptr<Pinpoint> m_pp;
 };
 
 #endif // PINPOINTITEM_H

@@ -44,7 +44,7 @@ private slots:
     void delete_node(int node_id);
     void rename_node(int node_id);
     void delete_pp(int pp_id);
-    void rename_pp(int pp_id);
+    void edit_pp(int pp_id);
 
     void on_startWireDrag(int node_id, int port_id, bool is_output, QPointF pos);
     void on_dragWire(QPointF current_scene_pos);

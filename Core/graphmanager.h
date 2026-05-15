@@ -7,10 +7,8 @@
 #include <vector>
 #include <QObject>
 
-class GraphManager : QObject
+class GraphManager
 {
-    Q_OBJECT
-
 public:
     GraphManager() = default;
     ~GraphManager() = default;

@@ -2,7 +2,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 
-PinpointDialog::PinpointDialog(QWidget* parent)
+PinpointDialog::PinpointDialog(QWidget* parent, QString text, QColor color)
     : QDialog(parent) {
     auto addColor = [this](const QString& label, const QColor& col) {
         QPixmap pix(16, 16);
@@ -18,7 +18,7 @@ PinpointDialog::PinpointDialog(QWidget* parent)
     m_nameEdit->setText("Pinpoint");
     m_nameEdit->selectAll();
     m_nameEdit->setPlaceholderText("Pinpoint name");
-    layout->addRow("Name:", m_nameEdit);
+    layout->addRow(text, m_nameEdit);
 
     m_colorCombo = new QComboBox(this);
     addColor("White",Qt::white);
